@@ -73,7 +73,6 @@ def log_recognition_event(name, confidence):
 load_config()
 
 app=Flask(__name__, static_url_path='/dataset', static_folder='dataset')
-app.config['UPLOAD_FOLDER'] = 'uploads'
 
 # --- Globals ---
 # Camera is now managed within each generator function, not globally.
@@ -546,11 +545,13 @@ def upload_file():
         if file.filename == '':
             return jsonify({'success': False, 'message': 'No selected file'})
         if file:
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
+            # Read the image directly from the file stream
+            np_img = np.frombuffer(file.read(), np.uint8)
+            image = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
             
-            image = cv2.imread(filepath)
+            if image is None:
+                return jsonify({'success': False, 'message': 'Could not decode image. Please ensure it is a valid image file.'})
+
             success, message = process_and_save_face(image, user_name, source='upload')
             
             if success:
@@ -627,10 +628,6 @@ def detectFace():
     return msg
 
 if __name__ == "__main__":
-    # Create the upload folder if it doesn't exist
-    if not os.path.exists(app.config['UPLOAD_FOLDER']):
-        os.makedirs(app.config['UPLOAD_FOLDER'])
-
     initialize_globals()
     # use_reloader=False is important! Otherwise, the initialization runs twice.
     # threaded=True allows handling multiple requests (e.g., serving the page and the stream)

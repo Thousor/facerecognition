@@ -171,16 +171,19 @@ def process_and_save_face(image, user_name, source='cam'):
 
     cascade_path = 'config/haarcascade_frontalface_alt.xml'
     if not os.path.exists(cascade_path):
+        print(f"人脸检测模型文件不存在：{cascade_path}")
         return False, f"人脸检测模型文件不存在：{cascade_path}"
 
     face_cascade = cv2.CascadeClassifier(cascade_path)
     if face_cascade.empty():
+        print(f"无法加载人脸检测模型：{cascade_path}")
         return False, f"无法加载人脸检测模型：{cascade_path}"
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
 
     if len(faces) == 0:
+        print("在上传的图片中未检测到清晰的人脸。")
         return False, "在上传的图片中未检测到清晰的人脸。"
 
     # 选择最大的人脸
@@ -188,6 +191,7 @@ def process_and_save_face(image, user_name, source='cam'):
 
     # 过滤小尺寸人脸
     if w < 100 or h < 100:
+        print(f"检测到的人脸尺寸过小 ({w}x{h})，请使用更高分辨率或更近距离的照片。")
         return False, f"检测到的人脸尺寸过小 ({w}x{h})，请使用更高分辨率或更近距离的照片。"
 
     face_roi = image[y:y + h, x:x + w]
@@ -202,6 +206,8 @@ def process_and_save_face(image, user_name, source='cam'):
         count += 1
 
     if cv2.imwrite(img_path, face_roi):
+        print(f"人脸已成功保存为：{img_path}")
         return True, f"人脸已成功保存为：{img_path}"
     else:
+        print(f"保存图片失败，请检查目录权限：{output_folder}")
         return False, f"保存图片失败，请检查目录权限：{output_folder}"

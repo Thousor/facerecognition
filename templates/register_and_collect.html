@@ -126,7 +126,7 @@
                             上传并注册
                         </button>
                     </form>
-                    <p id="upload-status" class="mt-4 text-center text-sm"></p>
+                    <div id="upload-status" class="mt-4 text-center text-sm"></div>
                 </div>
             </div>
 
@@ -385,6 +385,7 @@
 
             let successfulUploads = 0;
             let failedUploads = 0;
+            let errorMessages = []; // New: To store detailed error messages
 
             for (let i = 0; i < photoFiles.length; i++) {
                 const photoFile = photoFiles[i];
@@ -392,7 +393,7 @@
                 formData.append('user_name', userName);
                 formData.append('file', photoFile);
 
-                uploadStatusParagraph.textContent = `正在上传 ${photoFile.name} (${i + 1}/${photoFiles.length})...`;
+                uploadStatusParagraph.innerHTML = `正在上传 ${photoFile.name} (${i + 1}/${photoFiles.length})...`;
 
                 try {
                     const response = await fetch('/register_by_upload', {
@@ -407,29 +408,39 @@
                         successfulUploads++;
                     } else {
                         failedUploads++;
-                        console.error(`上传 ${photoFile.name} 失败: ${data.message}`);
+                        const errorMessage = `上传 ${photoFile.name} 失败: ${data.message}`;
+                        errorMessages.push(errorMessage); // Store error message
+                        console.error(errorMessage);
                     }
                 } catch (error) {
                     failedUploads++;
-                    console.error(`上传 ${photoFile.name} 出错:`, error);
+                    const errorMessage = `上传 ${photoFile.name} 出错: ${error.message}`;
+                    errorMessages.push(errorMessage); // Store error message
+                    console.error(errorMessage);
                 }
             }
 
+            let finalMessage = '';
             if (successfulUploads > 0 && failedUploads === 0) {
-                uploadStatusParagraph.textContent = `所有 ${successfulUploads} 张照片上传成功！`;
+                finalMessage = `所有 ${successfulUploads} 张照片上传成功！`;
                 uploadStatusParagraph.className = 'text-green-500';
                 uploadUserNameInput.value = '';
                 photoUploadInput.value = '';
             } else if (successfulUploads > 0 && failedUploads > 0) {
-                uploadStatusParagraph.textContent = `部分照片上传成功 (${successfulUploads} 成功, ${failedUploads} 失败)。请检查控制台获取详情。`;
+                finalMessage = `部分照片上传成功 (${successfulUploads} 成功, ${failedUploads} 失败)。`;
                 uploadStatusParagraph.className = 'text-orange-500';
             } else {
-                uploadStatusParagraph.textContent = `所有照片上传失败。请检查控制台获取详情。`;
+                finalMessage = `所有照片上传失败。`;
                 uploadStatusParagraph.className = 'text-red-500';
             }
-            
-            document.getElementById('upload-button').disabled = false;
-            console.log('Upload process finished.');
+
+            // Display all error messages
+            if (errorMessages.length > 0) {
+                finalMessage += '<br><br>详细错误：<ul class="list-disc list-inside text-left mx-auto" style="max-width: fit-content;">' + 
+                                errorMessages.map(msg => `<li>${msg}</li>`).join('') + 
+                                '</ul>';
+            }
+            uploadStatusParagraph.innerHTML = finalMessage;
         });
 
         document.addEventListener('DOMContentLoaded', () => {
