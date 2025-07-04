@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collect Faces</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #video-feed { border: 1px solid #ccc; display: block; margin-bottom: 10px; background-color: #f0f0f0; }
+        #controls { margin-bottom: 20px; }
+        #status { font-weight: bold; color: blue; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Collect Faces for New User</h1>
+
+    <div id="controls">
+        <label for="user-name">User Name:</label>
+        <input type="text" id="user-name" placeholder="Enter name">
+        <button id="start-collection">Start Collection</button>
+        <button id="stop-collection" disabled>Stop Collection</button>
+    </div>
+
+    <div>
+        <!-- Initially empty src, will be set by JavaScript -->
+        <img id="video-feed" src="" width="640" height="480" alt="Video Feed">
+    </div>
+
+    <p id="status">Ready to collect.</p>
+    <p id="image-count">Collected Images: 0</p>
+
+    <script>
+        const userNameInput = document.getElementById('user-name');
+        const startButton = document.getElementById('start-collection');
+        const stopButton = document.getElementById('stop-collection');
+        const statusParagraph = document.getElementById('status');
+        const imageCountParagraph = document.getElementById('image-count');
+        const videoFeed = document.getElementById('video-feed');
+
+        let collectionInterval;
+
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[[\\]]/g, '\\$&');
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+            var results = regex.exec(window.location.href);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+        startButton.addEventListener('click', async () => {
+            console.log('Start button clicked.');
+            const userName = userNameInput.value.trim();
+            console.log('User Name:', userName);
+
+            if (!userName) {
+                statusParagraph.textContent = 'Please enter a user name.';
+                statusParagraph.className = 'error';
+                console.log('Error: User name is empty.');
+                return;
+            }
+
+            statusParagraph.textContent = 'Starting collection...';
+            statusParagraph.className = '';
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            userNameInput.disabled = true;
+
+            try {
+                console.log('Sending POST request to /api/start_face_collection');
+                const response = await fetch('/api/start_face_collection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: userName })
+                });
+                
+                console.log('Received response status:', response.status);
+                console.log('Received response status text:', response.statusText);
+                console.log('Received response headers:', response.headers);
+
+                // Clone the response to read its text content if JSON parsing fails
+                const responseClone = response.clone();
+
+                try {
+                    const data = await response.json();
+                    console.log('Response data (JSON):', data);
+
+                    if (data.success) {
+                        statusParagraph.textContent = `Collecting faces for ${userName}...`;
+                        statusParagraph.className = '';
+                        imageCountParagraph.textContent = `Collected Images: 0`;
+                        // Set the video feed source AFTER successful start
+                        videoFeed.src = "{{ url_for('video_feed_collect') }}";
+                        console.log('Video feed src set to:', videoFeed.src);
+                        // Start polling for status updates
+                        collectionInterval = setInterval(getCollectionStatus, 1000);
+                    } else {
+                        statusParagraph.textContent = `Error: ${data.message}`;
+                        statusParagraph.className = 'error';
+                        startButton.disabled = false;
+                        stopButton.disabled = true;
+                        userNameInput.disabled = false;
+                        console.log('API call failed:', data.message);
+                    }
+                } catch (jsonError) {
+                    console.error('Error parsing JSON response:', jsonError);
+                    // If JSON parsing fails, read the raw text response
+                    const textResponse = await responseClone.text();
+                    console.error('Raw response text:', textResponse);
+                    statusParagraph.textContent = `Error: Unexpected response from server. Check console for details.`;
+                    statusParagraph.className = 'error';
+                    startButton.disabled = false;
+                    stopButton.disabled = true;
+                    userNameInput.disabled = false;
+                }
+
+            } catch (error) {
+                statusParagraph.textContent = `Network error: ${error.message}`;
+                statusParagraph.className = 'error';
+                startButton.disabled = false;
+                stopButton.disabled = true;
+                userNameInput.disabled = false;
+                console.error('Fetch error:', error);
+            }
+        });
+
+        stopButton.addEventListener('click', async () => {
+            console.log('Stop button clicked.');
+            statusParagraph.textContent = 'Stopping collection...';
+            statusParagraph.className = '';
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            userNameInput.disabled = false;
+            clearInterval(collectionInterval); // Stop polling
+            videoFeed.src = ""; // Clear the video feed source to stop the stream
+            console.log('Video feed src cleared.');
+
+            try {
+                console.log('Sending POST request to /api/stop_face_collection');
+                const response = await fetch('/api/stop_face_collection', {
+                    method: 'POST'
+                });
+                console.log('Received response from /api/stop_face_collection', response);
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (data.success) {
+                    statusParagraph.textContent = 'Collection stopped.';
+                } else {
+                    statusParagraph.textContent = `Error: ${data.message}`;
+                    statusParagraph.className = 'error';
+                }
+            } catch (error) {
+                statusParagraph.textContent = `Network error: ${error.message}`;
+                statusParagraph.className = 'error';
+                console.error('Fetch error on stop:', error);
+            }
+        });
+
+        async function getCollectionStatus() {
+            try {
+                const response = await fetch('/api/collection_status');
+                const data = await response.json();
+                if (data.is_collecting) {
+                    imageCountParagraph.textContent = `Collected Images: ${data.collected_count} / ${data.target_count}`;
+                    statusParagraph.textContent = `Collecting faces for ${data.name}...`;
+                } else {
+                    // If collection stopped from server side (e.g., target count reached)
+                    if (data.collected_count >= data.target_count && data.target_count > 0) {
+                        statusParagraph.textContent = `Collection complete! ${data.collected_count} images saved.`;
+                    } else {
+                        statusParagraph.textContent = 'Ready to collect.';
+                    }
+                    imageCountParagraph.textContent = `Collected Images: ${data.collected_count}`;
+                    startButton.disabled = false;
+                    stopButton.disabled = true;
+                    userNameInput.disabled = false;
+                    clearInterval(collectionInterval);
+                    videoFeed.src = ""; // Ensure video feed is stopped if collection ends on server side
+                }
+            } catch (error) {
+                console.error('Error fetching collection status:', error);
+                statusParagraph.textContent = 'Error fetching collection status.';
+                statusParagraph.className = 'error';
+                clearInterval(collectionInterval);
+                videoFeed.src = ""; // Clear video feed on error
+            }
+        }
+
+        // Initial setup on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const nameFromUrl = getUrlParameter('name');
+            if (nameFromUrl) {
+                userNameInput.value = nameFromUrl;
+                userNameInput.readOnly = true; // Make it read-only
+                // Automatically trigger the start button click
+                startButton.click();
+            } else {
+                getCollectionStatus(); // Only check status if not coming from register page
+            }
+        });
+    </script>
+</body>
+</html>

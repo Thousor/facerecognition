@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register New Face</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
+        input[type="text"] { padding: 10px; width: 200px; margin-right: 10px; }
+        button { padding: 10px 20px; }
+        #status { margin-top: 20px; font-weight: bold; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Register New Face</h1>
+    <div>
+        <input type="text" id="name" placeholder="Enter your name">
+        <button id="start_collect">Start Face Collection</button>
+    </div>
+    <p id="status"></p>
+
+    <script>
+        const nameInput = document.getElementById('name');
+        const startButton = document.getElementById('start_collect');
+        const statusParagraph = document.getElementById('status');
+
+        startButton.addEventListener('click', async () => {
+            const name = nameInput.value.trim();
+            if (!name) {
+                statusParagraph.textContent = "Please enter a name.";
+                statusParagraph.className = 'error';
+                return;
+            }
+
+            statusParagraph.textContent = `Initiating collection for ${name}...`;
+            statusParagraph.className = '';
+            startButton.disabled = true;
+
+            try {
+                const response = await fetch('/api/start_face_collection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: name })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    statusParagraph.textContent = `Collection initiated for ${name}. Redirecting...`;
+                    statusParagraph.className = 'success';
+                    // Redirect to the collect_faces page to show the live stream
+                    window.location.href = `/collect_faces?name=${encodeURIComponent(name)}`;
+                } else {
+                    statusParagraph.textContent = `Error: ${data.message}`;
+                    statusParagraph.className = 'error';
+                    startButton.disabled = false;
+                }
+            } catch (err) {
+                console.error("Error during collection initiation: ", err);
+                statusParagraph.textContent = "An error occurred during collection initiation. Check console for details.";
+                statusParagraph.className = 'error';
+                startButton.disabled = false;
+            }
+        });
+    </script>
+
+    <hr style="margin: 40px 0;">
+
+    <h1>Register by Uploading a Photo</h1>
+    <form action="/register_by_upload" method="post" enctype="multipart/form-data">
+        <div>
+            <input type="text" name="user_name" placeholder="Enter name" style="padding: 10px; width: 200px; margin-right: 10px;">
+            <input type="file" name="file" style="margin-right: 10px;">
+            <button type="submit" style="padding: 10px 20px;">Upload and Register</button>
+        </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .settings-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .settings-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .input-group label {
+            position: absolute;
+            top: -0.5rem;
+            left: 0.75rem;
+            padding: 0 0.25rem;
+            background-color: white;
+            color: #4B5563;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 0.5rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .input-group input:focus {
+            border-color: #3B82F6;
+        }
+        .input-group input:focus + label {
+            color: #3B82F6;
+        }
+        .input-group .hint {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9CA3AF;
+            font-size: 0.875rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .saving {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <nav class="mb-8">
+            <a href="/" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-2"></i>
+                返回主页
+            </a>
+        </nav>
+
+        <div class="max-w-4xl mx-auto">
+            <header class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">系统设置</h1>
+                <p class="text-gray-600">配置人脸识别系统的核心参数</p>
+            </header>
+
+            <div class="settings-card p-8">
+                <form id="settings_form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- 识别阈值 -->
+                        <div class="input-group">
+                            <input type="number" id="threshold" name="threshold" step="0.01" min="0" max="1" required
+                                class="peer">
+                            <label for="threshold">识别阈值</label>
+                            <span class="hint">0.0 - 1.0</span>
+                        </div>
+
+                        <!-- 采集图像数量 -->
+                        <div class="input-group">
+                            <input type="number" id="num_images_to_collect" name="num_images_to_collect" min="10" required
+                                class="peer">
+                            <label for="num_images_to_collect">采集图像数量</label>
+                            <span class="hint">最少10张</span>
+                        </div>
+
+                        <!-- 图像尺寸 -->
+                        <div class="input-group">
+                            <input type="number" id="image_size" name="image_size" min="32" required
+                                class="peer">
+                            <label for="image_size">图像尺寸</label>
+                            <span class="hint">像素</span>
+                        </div>
+
+                        <!-- 训练批次大小 -->
+                        <div class="input-group">
+                            <input type="number" id="batch_size" name="batch_size" min="1" required
+                                class="peer">
+                            <label for="batch_size">训练批次大小</label>
+                            <span class="hint">≥ 1</span>
+                        </div>
+
+                        <!-- 数据目录 -->
+                        <div class="input-group md:col-span-2">
+                            <input type="text" id="data_dir" name="data_dir" required
+                                class="peer">
+                            <label for="data_dir">数据存储目录</label>
+                            <span class="hint"><i class="fas fa-folder"></i></span>
+                        </div>
+
+                        <!-- 模型文件路径 -->
+                        <div class="input-group md:col-span-2">
+                            <input type="text" id="model_file_path" name="model_file_path" required
+                                class="peer">
+                            <label for="model_file_path">模型文件路径</label>
+                            <span class="hint"><i class="fas fa-file-code"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                        <div id="message" class="flex items-center text-sm font-medium"></div>
+                        <div class="space-x-4">
+                            <button type="button" onclick="resetToDefaults()" 
+                                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 flex items-center">
+                                <i class="fas fa-undo mr-2"></i>
+                                恢复默认
+                            </button>
+                            <button type="submit" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 flex items-center">
+                                <i class="fas fa-save mr-2"></i>
+                                保存设置
+                            </button>
+                        </div>
+                    </div>
+        </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let defaultSettings = {};
+
+        document.addEventListener('DOMContentLoaded', fetchSettings);
+
+        function fetchSettings() {
+            fetch('/api/settings')
+                .then(response => response.json())
+                .then(config => {
+                    defaultSettings = {...config};
+                    for (const key in config) {
+                        const input = document.getElementById(key);
+                        if (input) {
+                            input.value = config[key];
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching settings:', error);
+                    showMessage('加载设置时出错', 'error');
+                });
+        }
+
+        function resetToDefaults() {
+            if (!confirm('确定要恢复默认设置吗？当前的修改将会丢失。')) {
+                return;
+            }
+            for (const key in defaultSettings) {
+                const input = document.getElementById(key);
+                if (input) {
+                    input.value = defaultSettings[key];
+                }
+            }
+            showMessage('已恢复默认设置', 'info');
+        }
+
+        function showMessage(msg, type) {
+            const messageDiv = document.getElementById('message');
+            const icon = type === 'success' ? 'check-circle' :
+                        type === 'error' ? 'exclamation-circle' :
+                        'info-circle';
+            const color = type === 'success' ? 'text-green-500' :
+                         type === 'error' ? 'text-red-500' :
+                         'text-blue-500';
+            
+            messageDiv.className = `flex items-center text-sm font-medium ${color}`;
+            messageDiv.innerHTML = `
+                <i class="fas fa-${icon} mr-2"></i>
+                ${msg}
+            `;
+
+            // 3秒后自动清除消息
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        document.getElementById('settings_form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const submitButton = this.querySelector('button[type="submit"]');
+            const icon = submitButton.querySelector('i');
+            
+            // 显示保存中状态
+            submitButton.disabled = true;
+            icon.className = 'fas fa-spinner saving mr-2';
+
+            const formData = new FormData(this);
+            const newSettings = {};
+            for (const [key, value] of formData.entries()) {
+                if (!isNaN(value) && value !== '') {
+                    newSettings[key] = parseFloat(value);
+                } else {
+                    newSettings[key] = value;
+                }
+            }
+
+            fetch('/api/settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newSettings),
+            })
+            .then(response => response.json())
+            .then(data => {
+                showMessage(data.message, data.success ? 'success' : 'error');
+                if (data.success) {
+                    defaultSettings = {...newSettings};
+                }
+            })
+            .catch(error => {
+                console.error('Error saving settings:', error);
+                showMessage('保存设置时发生错误', 'error');
+            })
+            .finally(() => {
+                // 恢复按钮状态
+                submitButton.disabled = false;
+                icon.className = 'fas fa-save mr-2';
+            });
+        });
+    </script>
+</body>
+</html>

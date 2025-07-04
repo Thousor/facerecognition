@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册新用户 - 人脸采集</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #video-feed {
+            width: 100%;
+            height: auto;
+            display: block;
+            background-color: #f0f0f0;
+            border-radius: 1rem;
+        }
+        .collection-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .video-container:hover .collection-overlay {
+            opacity: 1;
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <nav class="mb-8">
+            <a href="/" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-2"></i>
+                返回主页
+            </a>
+        </nav>
+
+        <div class="max-w-4xl mx-auto">
+            <header class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">注册新用户</h1>
+                <p class="text-gray-600">请面对摄像头，系统将自动采集人脸图像用于训练</p>
+            </header>
+
+            <!-- 模式切换按钮 -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <button id="mode-camera" class="px-6 py-3 rounded-lg font-bold text-white bg-blue-600 hover:bg-blue-700 transition duration-300">
+                    <i class="fas fa-camera mr-2"></i> 摄像头采集
+                </button>
+                <button id="mode-upload" class="px-6 py-3 rounded-lg font-bold text-gray-700 bg-gray-200 hover:bg-gray-300 transition duration-300">
+                    <i class="fas fa-upload mr-2"></i> 上传照片
+                </button>
+            </div>
+
+            <!-- 摄像头采集模式 -->
+            <div id="camera-mode-content" class="bg-white rounded-lg shadow-md p-8 mb-8">
+                <header class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">摄像头采集</h2>
+                    <p class="text-gray-600">请面对摄像头，系统将自动采集人脸图像用于训练</p>
+                </header>
+                <div class="max-w-md mx-auto">
+                    <div class="mb-6">
+                        <label for="user-name" class="block text-gray-700 text-sm font-bold mb-2">用户姓名</label>
+                        <div class="flex">
+                            <input type="text" id="user-name" 
+                                class="flex-1 shadow appearance-none border rounded-l-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                                placeholder="请输入用户姓名">
+                            <button id="start-collection" 
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-r-lg transition duration-300 flex items-center">
+                                <i class="fas fa-camera mr-2"></i>
+                                开始采集
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 上传照片模式 -->
+            <div id="upload-mode-content" class="bg-white rounded-lg shadow-md p-8 mb-8 hidden">
+                <header class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">上传照片</h2>
+                    <p class="text-gray-600">上传一张包含人脸的照片进行注册</p>
+                </header>
+                <div class="max-w-md mx-auto">
+                    <form id="upload-form" enctype="multipart/form-data">
+                        <div class="mb-6">
+                            <label for="upload-user-name" class="block text-gray-700 text-sm font-bold mb-2">用户姓名</label>
+                            <input type="text" id="upload-user-name" name="user_name" 
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                                placeholder="请输入用户姓名" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="photo-upload" class="block text-gray-700 text-sm font-bold mb-2">选择照片</label>
+                            <input type="file" id="photo-upload" name="file" accept="image/*" multiple
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                        </div>
+                        <button type="submit" id="upload-button"
+                            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 w-full">
+                            <i class="fas fa-upload mr-2"></i>
+                            上传并注册
+                        </button>
+                    </form>
+                    <p id="upload-status" class="mt-4 text-center text-sm"></p>
+                </div>
+            </div>
+
+            <!-- 采集界面 -->
+            <div id="collection-controls" class="hidden">
+                <div class="video-container mb-8">
+                    <img id="video-feed" src="" alt="摄像头画面">
+                    <div class="collection-overlay">
+                        <div class="text-center">
+                            <i class="fas fa-camera-retro text-6xl mb-4"></i>
+                            <p>正在采集人脸图像</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center space-y-6">
+                    <div class="inline-flex items-center space-x-2 text-lg font-medium">
+                        <svg class="progress-ring w-6 h-6 animate-spin" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                            <circle class="opacity-75" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-dasharray="30 60" fill="none"></circle>
+                        </svg>
+                        <span id="status" class="text-blue-600">准备开始采集...</span>
+                    </div>
+                    
+                    <div class="bg-gray-100 rounded-full h-4 overflow-hidden">
+                        <div id="progress-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    
+                    <p id="image-count" class="text-gray-600">已采集图像：0</p>
+
+                    <button id="stop-collection" 
+                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300 flex items-center mx-auto">
+                        <i class="fas fa-stop-circle mr-2"></i>
+                        停止采集
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userNameInput = document.getElementById('user-name');
+        const startButton = document.getElementById('start-collection');
+        const stopButton = document.getElementById('stop-collection');
+        const statusElement = document.getElementById('status');
+        const imageCountElement = document.getElementById('image-count');
+        const videoFeed = document.getElementById('video-feed');
+        const collectionControls = document.getElementById('collection-controls');
+        const progressBar = document.getElementById('progress-bar');
+
+        const modeCameraButton = document.getElementById('mode-camera');
+        const modeUploadButton = document.getElementById('mode-upload');
+        const cameraModeContent = document.getElementById('camera-mode-content');
+        const uploadModeContent = document.getElementById('upload-mode-content');
+
+        const uploadForm = document.getElementById('upload-form');
+        const uploadUserNameInput = document.getElementById('upload-user-name');
+        const photoUploadInput = document.getElementById('photo-upload');
+        const uploadStatusParagraph = document.getElementById('upload-status');
+
+        let collectionInterval;
+
+        // Function to switch modes
+        function switchMode(mode) {
+            if (mode === 'camera') {
+                cameraModeContent.classList.remove('hidden');
+                uploadModeContent.classList.add('hidden');
+                modeCameraButton.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                modeCameraButton.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                modeUploadButton.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                modeUploadButton.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                uploadStatusParagraph.textContent = ''; // Clear upload status when switching away
+            } else if (mode === 'upload') {
+                cameraModeContent.classList.add('hidden');
+                uploadModeContent.classList.remove('hidden');
+                modeUploadButton.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                modeUploadButton.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                modeCameraButton.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                modeCameraButton.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                statusElement.textContent = '准备开始采集...'; // Clear camera status when switching away
+                imageCountElement.textContent = '已采集图像：0';
+                progressBar.style.width = '0%';
+            }
+        }
+
+        // Event listeners for mode switching buttons
+        modeCameraButton.addEventListener('click', () => switchMode('camera'));
+        modeUploadButton.addEventListener('click', () => switchMode('upload'));
+
+        function getUrlParameter(name) {
+            name = name.replace(/[[\\]\\]/g, '\\$&');
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+            var results = regex.exec(window.location.href);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+        function showCollectionUI() {
+            cameraModeContent.classList.add('hidden'); // Hide camera input form
+            uploadModeContent.classList.add('hidden'); // Hide upload input form
+            collectionControls.classList.remove('hidden');
+        }
+
+        function showInitialUI() {
+            collectionControls.classList.add('hidden');
+            // Re-show the currently selected mode's input form
+            if (modeCameraButton.classList.contains('bg-blue-600')) {
+                cameraModeContent.classList.remove('hidden');
+            } else {
+                uploadModeContent.classList.remove('hidden');
+            }
+        }
+
+        function updateProgressBar(current, total) {
+            const percentage = (current / total) * 100;
+            progressBar.style.width = `${percentage}%`;
+        }
+
+        startButton.addEventListener('click', async () => {
+            const userName = userNameInput.value.trim();
+
+            if (!userName) {
+                statusElement.textContent = '请输入用户姓名';
+                statusElement.classList.add('text-red-500');
+                return;
+            }
+
+            statusElement.textContent = '正在启动采集...';
+            statusElement.classList.remove('text-red-500');
+            startButton.disabled = true;
+            userNameInput.disabled = true;
+
+            try {
+                const response = await fetch('/api/start_face_collection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: userName })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusElement.textContent = `正在采集 ${userName} 的人脸图像...`;
+                    imageCountElement.textContent = `已采集图像：0`;
+                    videoFeed.src = "{{ url_for('video_feed_collect') }}";
+                    collectionInterval = setInterval(getCollectionStatus, 1000);
+                    showCollectionUI();
+                } else {
+                    statusElement.textContent = `错误：${data.message}`;
+                    statusElement.classList.add('text-red-500');
+                    startButton.disabled = false;
+                    userNameInput.disabled = false;
+                }
+            } catch (error) {
+                statusElement.textContent = `网络错误：${error.message}`;
+                statusElement.classList.add('text-red-500');
+                startButton.disabled = false;
+                userNameInput.disabled = false;
+            }
+        });
+
+        stopButton.addEventListener('click', async () => {
+            statusElement.textContent = '正在停止采集...';
+            stopButton.disabled = true;
+            clearInterval(collectionInterval);
+            videoFeed.src = "";
+
+            try {
+                const response = await fetch('/api/stop_face_collection', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    statusElement.textContent = '采集已停止';
+                } else {
+                    statusElement.textContent = `错误：${data.message}`;
+                    statusElement.classList.add('text-red-500');
+                }
+            } catch (error) {
+                statusElement.textContent = `网络错误：${error.message}`;
+                statusElement.classList.add('text-red-500');
+            } finally {
+                showInitialUI();
+                startButton.disabled = false;
+                userNameInput.disabled = false;
+                stopButton.disabled = false;
+            }
+        });
+
+        async function getCollectionStatus() {
+            try {
+                const response = await fetch('/api/collection_status');
+                const data = await response.json();
+                
+                if (data.is_collecting) {
+                    imageCountElement.textContent = `已采集图像：${data.collected_count} / ${data.target_count}`;
+                    statusElement.textContent = `正在采集 ${data.name} 的人脸图像...`;
+                    updateProgressBar(data.collected_count, data.target_count);
+                } else {
+                    if (data.collected_count >= data.target_count && data.target_count > 0) {
+                        statusElement.textContent = `采集完成！共采集 ${data.collected_count} 张图像。`;
+                    } else {
+                        statusElement.textContent = '准备开始采集';
+                    }
+                    imageCountElement.textContent = `已采集图像：${data.collected_count}`;
+                    clearInterval(collectionInterval);
+                    videoFeed.src = "";
+                    showInitialUI();
+                    startButton.disabled = false;
+                    userNameInput.disabled = false;
+                }
+            }
+            catch (error) {
+                console.error('获取采集状态出错:', error);
+                statusElement.textContent = '获取采集状态时出错';
+                statusElement.classList.add('text-red-500');
+                clearInterval(collectionInterval);
+                videoFeed.src = "";
+                showInitialUI();
+                startButton.disabled = false;
+                userNameInput.disabled = false;
+            }
+        }
+
+        // Handle upload form submission via AJAX
+        uploadForm.addEventListener('submit', async (event) => {
+            console.log('Upload form submitted.');
+            event.preventDefault(); // Prevent default form submission
+
+            const userName = uploadUserNameInput.value.trim();
+            const photoFiles = photoUploadInput.files;
+
+            console.log('User Name:', userName);
+            console.log('Photo Files:', photoFiles);
+
+            if (!userName) {
+                uploadStatusParagraph.textContent = '请输入用户姓名';
+                uploadStatusParagraph.className = 'text-red-500';
+                console.log('Validation failed: No user name.');
+                return;
+            }
+            if (photoFiles.length === 0) {
+                uploadStatusParagraph.textContent = '请选择至少一张照片';
+                uploadStatusParagraph.className = 'text-red-500';
+                console.log('Validation failed: No photo file.');
+                return;
+            }
+
+            uploadStatusParagraph.textContent = '正在上传并处理...';
+            uploadStatusParagraph.className = '';
+            document.getElementById('upload-button').disabled = true;
+
+            let successfulUploads = 0;
+            let failedUploads = 0;
+
+            for (let i = 0; i < photoFiles.length; i++) {
+                const photoFile = photoFiles[i];
+                const formData = new FormData();
+                formData.append('user_name', userName);
+                formData.append('file', photoFile);
+
+                uploadStatusParagraph.textContent = `正在上传 ${photoFile.name} (${i + 1}/${photoFiles.length})...`;
+
+                try {
+                    const response = await fetch('/register_by_upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+
+                    console.log(`Response for ${photoFile.name}:`, data);
+
+                    if (data.success) {
+                        successfulUploads++;
+                    } else {
+                        failedUploads++;
+                        console.error(`上传 ${photoFile.name} 失败: ${data.message}`);
+                    }
+                } catch (error) {
+                    failedUploads++;
+                    console.error(`上传 ${photoFile.name} 出错:`, error);
+                }
+            }
+
+            if (successfulUploads > 0 && failedUploads === 0) {
+                uploadStatusParagraph.textContent = `所有 ${successfulUploads} 张照片上传成功！`;
+                uploadStatusParagraph.className = 'text-green-500';
+                uploadUserNameInput.value = '';
+                photoUploadInput.value = '';
+            } else if (successfulUploads > 0 && failedUploads > 0) {
+                uploadStatusParagraph.textContent = `部分照片上传成功 (${successfulUploads} 成功, ${failedUploads} 失败)。请检查控制台获取详情。`;
+                uploadStatusParagraph.className = 'text-orange-500';
+            } else {
+                uploadStatusParagraph.textContent = `所有照片上传失败。请检查控制台获取详情。`;
+                uploadStatusParagraph.className = 'text-red-500';
+            }
+            
+            document.getElementById('upload-button').disabled = false;
+            console.log('Upload process finished.');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Default to camera mode on page load
+            switchMode('camera');
+
+            // Check for name in URL for camera mode auto-start (existing logic)
+            const nameFromUrl = getUrlParameter('name');
+            if (nameFromUrl) {
+                userNameInput.value = nameFromUrl;
+                startButton.click();
+            } else {
+                // If no auto-start, ensure initial status is fetched for camera mode
+                if (modeCameraButton.classList.contains('bg-blue-600')) {
+                    getCollectionStatus();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

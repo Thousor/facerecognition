@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Details: {{ user_name }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
+        h1 { color: #333; }
+        #image_gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 20px; }
+        #image_gallery img { width: 150px; height: 150px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px; }
+        .back-link { display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px; }
+        .back-link:hover { background-color: #5a6268; }
+    </style>
+</head>
+<body>
+    <h1>User Details: {{ user_name }}</h1>
+    <div id="image_gallery">
+        <!-- Images will be loaded here by JavaScript -->
+    </div>
+    <a href="/users" class="back-link">Back to User Management</a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', fetchUserImages);
+
+        function fetchUserImages() {
+            const userName = "{{ user_name }}"; // Get user name from Flask template
+            fetch(`/api/users/${userName}/images`)
+                .then(response => response.json())
+                .then(imagePaths => {
+                    const gallery = document.getElementById('image_gallery');
+                    if (imagePaths.length === 0) {
+                        gallery.innerHTML = '<p>No images found for this user.</p>';
+                        return;
+                    }
+                    imagePaths.forEach(path => {
+                        const img = document.createElement('img');
+                        img.src = path;
+                        img.alt = userName + ' image';
+                        gallery.appendChild(img);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching user images:', error);
+                    document.getElementById('image_gallery').innerHTML = '<p>Error loading images.</p>';
+                });
+        }
+    </script>
+</body>
+</html>

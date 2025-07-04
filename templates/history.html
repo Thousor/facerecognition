@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>识别历史记录</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .history-container {
+            background: #1a1a1a;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .history-log {
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+            height: 600px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #666 #1a1a1a;
+        }
+        .history-log::-webkit-scrollbar {
+            width: 8px;
+        }
+        .history-log::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        .history-log::-webkit-scrollbar-thumb {
+            background-color: #666;
+            border-radius: 4px;
+        }
+        .log-entry {
+            position: relative;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #333;
+            transition: background-color 0.2s ease;
+        }
+        .log-entry:hover {
+            background-color: #2a2a2a;
+        }
+        .log-entry::before {
+            content: '>';
+            position: absolute;
+            left: 0.5rem;
+            color: #666;
+        }
+        .loading-animation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            margin: 0 4px;
+            background-color: #00ff00;
+            border-radius: 50%;
+            animation: loading 1s infinite ease-in-out;
+        }
+        .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes loading {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: #666;
+        }
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <nav class="mb-8">
+            <a href="/" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-2"></i>
+                返回主页
+            </a>
+        </nav>
+
+        <div class="max-w-4xl mx-auto">
+            <header class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">识别历史记录</h1>
+                <p class="text-gray-600">查看系统的人脸识别历史记录</p>
+            </header>
+
+            <div class="history-container p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center text-gray-400">
+                        <i class="fas fa-terminal mr-2"></i>
+                        <span>识别日志</span>
+                    </div>
+                    <button onclick="fetchHistory()" class="text-gray-400 hover:text-white transition-colors duration-200">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div id="history_log" class="history-log">
+                    <div class="loading-animation">
+                        <div class="loading-dot"></div>
+                        <div class="loading-dot"></div>
+                        <div class="loading-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                <div class="inline-flex space-x-4">
+                    <a href="/" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 flex items-center">
+                        <i class="fas fa-home mr-2"></i>
+                        返回主页
+                    </a>
+                    <button onclick="clearHistory()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 flex items-center">
+                        <i class="fas fa-trash-alt mr-2"></i>
+                        清空历史
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', fetchHistory);
+
+        function fetchHistory() {
+            const historyLog = document.getElementById('history_log');
+            historyLog.innerHTML = `
+                <div class="loading-animation">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                </div>
+            `;
+
+            fetch('/api/history')
+                .then(response => response.json())
+                .then(history => {
+                    if (history.length === 0) {
+                        historyLog.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-history empty-icon"></i>
+                                <p>暂无识别记录</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    historyLog.innerHTML = '';
+                    history.forEach(entry => {
+                        const logEntryDiv = document.createElement('div');
+                        logEntryDiv.className = 'log-entry';
+                        logEntryDiv.textContent = entry;
+                        historyLog.appendChild(logEntryDiv);
+                    });
+                    historyLog.scrollTop = historyLog.scrollHeight;
+                })
+                .catch(error => {
+                    console.error('Error fetching history:', error);
+                    historyLog.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle empty-icon text-red-500"></i>
+                            <p class="text-red-500">加载历史记录时出错</p>
+                        </div>
+                    `;
+                });
+        }
+
+        function clearHistory() {
+            if (!confirm('确定要清空所有历史记录吗？此操作不可撤销。')) {
+                return;
+            }
+
+            fetch('/api/clear_history', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    fetchHistory();
+                } else {
+                    alert('清空历史记录失败：' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error clearing history:', error);
+                alert('清空历史记录时发生错误');
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人脸识别系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .card {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        #training_log {
+            background-color: #1a1a1a;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .loading {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">人脸识别系统</h1>
+            <p class="text-gray-600">智能、快速、准确的人脸识别解决方案</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 注册新面孔 -->
+            <div class="card bg-white rounded-lg shadow-md p-6">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-plus text-4xl text-blue-500"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-center mb-4">注册新面孔</h2>
+                <p class="text-gray-600 text-center mb-4">添加新用户到系统中进行人脸采集</p>
+                <a href="/register_collect" class="block text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    开始注册
+                </a>
+            </div>
+
+            <!-- 训练模型 -->
+            <div class="card bg-white rounded-lg shadow-md p-6">
+                <div class="text-center mb-4">
+                    <i class="fas fa-brain text-4xl text-green-500"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-center mb-4">训练模型</h2>
+                <p class="text-gray-600 text-center mb-4">使用收集的数据训练识别模型</p>
+                <button id="train_button" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    开始训练
+                </button>
+            </div>
+
+            <!-- 打开摄像头识别 -->
+            <div class="card bg-white rounded-lg shadow-md p-6">
+                <div class="text-center mb-4">
+                    <i class="fas fa-camera text-4xl text-purple-500"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-center mb-4">人脸识别</h2>
+                <p class="text-gray-600 text-center mb-4">实时摄像头人脸识别</p>
+                <a href="/show_camera" class="block text-center bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    开始识别
+                </a>
+            </div>
+
+            <!-- 用户管理 -->
+            <div class="card bg-white rounded-lg shadow-md p-6">
+                <div class="text-center mb-4">
+                    <i class="fas fa-users-cog text-4xl text-indigo-500"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-center mb-4">用户管理</h2>
+                <p class="text-gray-600 text-center mb-4">管理系统中的用户信息</p>
+                <a href="/users" class="block text-center bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    管理用户
+                </a>
+            </div>
+
+            <!-- 应用设置 -->
+            <div class="card bg-white rounded-lg shadow-md p-6">
+                <div class="text-center mb-4">
+                    <i class="fas fa-cog text-4xl text-gray-500"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-center mb-4">应用设置</h2>
+                <p class="text-gray-600 text-center mb-4">配置系统参数和选项</p>
+                <a href="/settings" class="block text-center bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    系统设置
+                </a>
+            </div>
+
+            <!-- 识别历史 -->
+            <div class="card bg-white rounded-lg shadow-md p-6">
+                <div class="text-center mb-4">
+                    <i class="fas fa-history text-4xl text-yellow-500"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-center mb-4">识别历史</h2>
+                <p class="text-gray-600 text-center mb-4">查看历史识别记录</p>
+                <a href="/history" class="block text-center bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    查看历史
+                </a>
+            </div>
+        </div>
+
+        <!-- 训练状态和日志 -->
+        <div class="mt-8">
+            <p id="status" class="text-center text-lg font-semibold mb-4"></p>
+            <div id="training_log" class="hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const trainButton = document.getElementById('train_button');
+            const status = document.getElementById('status');
+            let training = false;
+
+            function checkTrainingStatus() {
+                fetch('/train_status')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (training !== data.training) {
+                            training = data.training;
+                            updateButton();
+                        }
+                    })
+                    .catch(err => console.error('Error fetching training status:', err));
+            }
+
+            function updateButton() {
+                if (training) {
+                    trainButton.textContent = '停止训练';
+                    trainButton.classList.remove('bg-green-500', 'hover:bg-green-600');
+                    trainButton.classList.add('bg-red-500', 'hover:bg-red-600');
+                    status.textContent = '模型正在训练中...';
+                    status.classList.add('loading');
+                    trainButton.disabled = false;
+                    trainButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    trainButton.textContent = '开始训练';
+                    trainButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+                    trainButton.classList.add('bg-green-500', 'hover:bg-green-600');
+                    status.textContent = '点击按钮开始训练模型。';
+                    status.classList.remove('loading');
+                    trainButton.disabled = false;
+                    trainButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            trainButton.addEventListener('click', () => {
+                trainButton.disabled = true;
+                trainButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+                const action = training ? '/stop_training' : '/train';
+                const method = 'POST';
+
+                fetch(action, { method: method })
+                    .then(response => response.json())
+                    .then(data => {
+                        status.textContent = data.message;
+                        // Immediately check status to update UI faster
+                        checkTrainingStatus();
+                    })
+                    .catch(err => {
+                        console.error('Error during fetch:', err);
+                        status.textContent = `请求出错: ${err}`;
+                        // Re-enable button on error
+                        trainButton.disabled = false;
+                        trainButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    });
+            });
+
+            // Check status every 3 seconds to keep UI in sync with backend
+            setInterval(checkTrainingStatus, 3000);
+
+            // Initial status check on page load
+            checkTrainingStatus();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+    "threshold": 0.7,
+    "num_images_to_collect": 50,
+    "image_size": 128,
+    "batch_size": 32,
+    "data_dir": "dataset/",
+    "model_file_path": "face.keras"
+}
