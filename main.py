@@ -2,9 +2,9 @@
 #encoding:utf-8
 from __future__ import division
 
-'''
+"""
 功能： 将人脸识别模型暴露为web服务接口，用于演示的demo
-'''
+"""
 
 import os
 import cv2
@@ -21,12 +21,17 @@ from datetime import datetime # Added for logging timestamp
 import threading
 import time
 import cv2
-from flask import Flask, render_template, request, redirect, url_for, jsonify, Response
+from flask import Flask, render_template, request, redirect, url_for, jsonify, Response, send_file, make_response
 from werkzeug.utils import secure_filename
+from beauty_processor import BeautyProcessor
+import io
 
 from collect_data import collect_faces, process_and_save_face
 from dataHelper import read_name_list
 from faceRegnigtionModel import train_and_save_model, FaceRecognitionModel, get_datasets, IMAGE_SIZE, MODEL_FILE_PATH
+
+camera_active = True # Global variable to control camera stream
+last_beauty_frame = None # Global to store the last processed frame for capture
 
 # --- Global variables for training control ---
 training_thread = None
@@ -79,6 +84,18 @@ app=Flask(__name__, static_url_path='/dataset', static_folder='dataset')
 face_recognition_model = None
 name_list_camera = []
 img_size = 128 # Will be updated from config
+
+# 初始化美颜处理器
+beauty_processor = BeautyProcessor()
+beauty_options = {
+    'smooth': False,
+    'whiten': False,
+    'slim': False,
+    'acne': False,
+    'smooth_level': 0.7,
+    'whiten_level': 0.3,
+    'slim_level': 0.2
+}
 
 def initialize_globals():
     """Initializes recognition model and name list."""
@@ -478,7 +495,7 @@ def train_progress():
                 # No new data, keep connection alive
                 yield "data: \n" # Send a keep-alive message
             except Exception as e:
-                print(f"Error in train_progress generator: {e}")
+                print(f"An error occurred in train_progress generator: {e}")
                 yield f"data: Error: {e}\n\n"
                 break
             time.sleep(0.1) # Small delay to prevent busy-waiting
@@ -515,9 +532,7 @@ def rename_user(old_name):
     old_path = os.path.join(current_config['data_dir'], old_name)
     new_path = os.path.join(current_config['data_dir'], new_name.strip())
 
-    if not os.path.exists(old_path):
-        return jsonify({'success': False, 'message': f'User {old_name} not found.'})
-    if os.path.exists(new_path):
+    if not os.path.exists(new_path):
         return jsonify({'success': False, 'message': f'User {new_name.strip()} already exists.'})
 
     try:
@@ -626,6 +641,157 @@ def detectFace():
     tsg=u' 总耗时为： %s 秒' % execute_time
     msg=res+'\n\n'+tsg
     return msg
+
+@app.route('/beauty')
+def beauty():
+    return render_template('beauty.html')
+
+@app.route('/api/update_beauty_options', methods=['POST'])
+def update_beauty_options():
+    global beauty_options
+    beauty_options = request.json
+    return jsonify({'status': 'success'})
+
+def beauty_frame(frame):
+    """处理视频帧的美颜效果"""
+    return beauty_processor.process_frame(frame, beauty_options)
+
+@app.route('/video_feed_beauty')
+def video_feed_beauty():
+    """生成美颜处理后的视频流"""
+    def generate():
+        global camera_active
+        cap = cv2.VideoCapture(0)
+        while True:
+            if not camera_active:
+                # If camera is not active, release it and break the loop
+                if cap.isOpened():
+                    cap.release()
+                break
+
+            success, frame = cap.read()
+            if not success:
+                break
+            
+            # 应用美颜效果
+            frame = beauty_frame(frame)
+            
+            # 转换为JPEG格式
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        
+        if cap.isOpened():
+            cap.release()
+    
+    return Response(generate(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/api/capture_frame', methods=['POST'])
+def capture_frame():
+    data = request.json
+    folder_name = data.get('folder_name')
+    current_beauty_options = data.get('beauty_options', {}) # Get current beauty options from frontend
+
+    if not folder_name:
+        return jsonify({'success': False, 'message': 'Folder name is required.'}), 400
+
+    cap = cv2.VideoCapture(0) # Open camera directly for capture
+    if not cap.isOpened():
+        return jsonify({'success': False, 'message': 'Failed to open camera for capture.'}), 500
+
+    success, frame = cap.read()
+    cap.release() # Release camera immediately after capture
+
+    if not success:
+        return jsonify({'success': False, 'message': 'Failed to capture frame from camera.'}), 500
+
+    # Apply beauty effects to the captured frame
+    processed_frame = beauty_processor.process_frame(frame, current_beauty_options)
+
+    save_dir = os.path.join('beauty', folder_name)
+    os.makedirs(save_dir, exist_ok=True)
+
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    file_path = os.path.join(save_dir, f'captured_{timestamp}.jpg')
+
+    try:
+        cv2.imwrite(file_path, processed_frame)
+        return jsonify({'success': True, 'message': 'Frame captured successfully.', 'file_path': file_path})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to save frame: {str(e)}'}), 500
+
+
+@app.route('/api/process_image', methods=['POST'])
+def process_image():
+    """处理上传的图片"""
+    if 'image' not in request.files:
+        return jsonify({'error': '没有上传图片'}), 400
+        
+    file = request.files['image']
+    options = json.loads(request.form.get('options', '{}'))
+    original_filename = request.form.get('original_filename', 'unknown') # Get original filename
+    
+    # 读取图片
+    image_bytes = file.read()
+    nparr = np.frombuffer(image_bytes, np.uint8)
+    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    
+    # 处理图片
+    processed = beauty_processor.process_frame(image, options)
+    
+    # 转换回字节流
+    is_success, buffer = cv2.imencode(".jpg", processed)
+    if not is_success:
+        return jsonify({'error': '图片处理失败'}), 500
+        
+    response = make_response(buffer.tobytes())
+    response.headers['Content-Type'] = 'image/jpeg'
+    response.headers['X-Original-Filename'] = original_filename # Send original filename back
+    return response
+
+@app.route('/api/save_processed_image', methods=['POST'])
+def save_processed_image():
+    if 'image' not in request.files:
+        return jsonify({'success': False, 'message': 'No image file provided.'}), 400
+
+    file = request.files['image']
+    original_filename = request.form.get('original_filename', 'unknown')
+
+    image_bytes = file.read()
+    nparr = np.frombuffer(image_bytes, np.uint8)
+    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    if image is None:
+        return jsonify({'success': False, 'message': 'Could not decode image.'}), 400
+
+    # 获取原始文件所在目录
+    original_dir = os.path.dirname(os.path.join('uploads', original_filename))
+    if not os.path.exists(original_dir):
+        original_dir = 'beauty/processed_images'  # 如果原目录不存在，使用默认目录
+    
+    os.makedirs(original_dir, exist_ok=True)
+
+    # 生成新的文件名（添加时间戳和 _beauty 后缀）
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    base_name = os.path.splitext(original_filename)[0]
+    file_path = os.path.join(original_dir, f'{base_name}_beauty_{timestamp}.jpg')
+
+    try:
+        cv2.imwrite(file_path, image)
+        return jsonify({
+            'success': True, 
+            'message': 'Processed image saved successfully.', 
+            'file_path': file_path
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False, 
+            'message': f'Failed to save processed image: {str(e)}'
+        }), 500
+
 
 if __name__ == "__main__":
     initialize_globals()

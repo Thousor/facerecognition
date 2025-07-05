@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人脸美颜</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .video-feed {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: #e5e7eb;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3B82F6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #3B82F6;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        .file-drop-zone {
+            border: 2px dashed #e5e7eb;
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+        .file-drop-zone.drag-over {
+            border-color: #3B82F6;
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <nav class="mb-8">
+            <a href="/" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-2"></i>
+                返回主页
+            </a>
+        </nav>
+
+        <div class="max-w-6xl mx-auto">
+            <header class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">人脸美颜</h1>
+                <p class="text-gray-600">实时美颜处理 & 图片美颜</p>
+            </header>
+
+            <!-- 模式选择 -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <button id="camera-mode-btn" class="px-6 py-3 rounded-lg text-lg font-semibold transition duration-300 bg-blue-500 text-white shadow-md">
+                    <i class="fas fa-video mr-2"></i> 摄像头美颜
+                </button>
+                <button id="image-mode-btn" class="px-6 py-3 rounded-lg text-lg font-semibold transition duration-300 bg-gray-300 text-gray-700 hover:bg-gray-400 shadow-md">
+                    <i class="fas fa-image mr-2"></i> 图片处理
+                </button>
+            </div>
+
+            <!-- 摄像头美颜区域 -->
+            <div id="camera-beauty-section" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- 实时视频处理 -->
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">实时美颜</h2>
+                    <div class="video-container">
+                        <img id="video-feed" src="{{ url_for('video_feed_beauty') }}" class="video-feed" alt="实时摄像头画面">
+                    </div>
+                    <div class="flex flex-col items-center space-y-4">
+                        <button id="capture-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition duration-300 text-lg">
+                            <i class="fas fa-camera mr-2"></i> 拍照
+                        </button>
+                        <div class="w-full max-w-md">
+                            <label for="folder-name" class="block text-gray-700 text-sm font-bold mb-2">保存文件夹名称:</label>
+                            <input type="text" id="folder-name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="请输入您的姓名，例如: 张三">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 控制面板 (摄像头美颜) -->
+                <div class="control-panel p-6 space-y-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">美颜控制</h2>
+                    
+                    <!-- 磨皮 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-gray-700 font-medium">磨皮</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="smooth-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <input type="range" id="smooth-level" class="slider" min="0" max="100" value="70">
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span>弱</span>
+                            <span>强</span>
+                        </div>
+                    </div>
+
+                    <!-- 美白 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-gray-700 font-medium">美白</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="whiten-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <input type="range" id="whiten-level" class="slider" min="0" max="100" value="30">
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span>弱</span>
+                            <span>强</span>
+                        </div>
+                    </div>
+
+                    <!-- 瘦脸 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-gray-700 font-medium">瘦脸</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="slim-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <input type="range" id="slim-level" class="slider" min="0" max="100" value="20">
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span>弱</span>
+                            <span>强</span>
+                        </div>
+                    </div>
+
+                    <!-- 祛痘 -->
+                    <div class="flex justify-between items-center">
+                        <label class="text-gray-700 font-medium">祛痘</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="acne-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+
+            <!-- 图片处理区域 -->
+            <div id="image-processing-section" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">图片处理</h2>
+                    
+                    <!-- 文件上传区域 -->
+                    <div id="drop-zone" class="file-drop-zone p-8 text-center">
+                        <div class="space-y-4">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                            <p class="text-gray-600">拖放图片到此处或点击上传</p>
+                            <input type="file" id="file-input" class="hidden" accept="image/*">
+                            <button onclick="document.getElementById('file-input').click()" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
+                                选择图片
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 处理结果展示 -->
+                    <div id="result-container" class="hidden grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <p class="text-gray-700 font-medium">原图</p>
+                            <img id="original-image" class="w-full rounded-lg" alt="原图">
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-gray-700 font-medium">处理后</p>
+                            <img id="processed-image" class="w-full rounded-lg" alt="处理后">
+                        </div>
+                    </div>
+
+                    <!-- 图片处理按钮 -->
+                    <div class="flex justify-center space-x-4 mt-4">
+                        <button id="process-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
+                            <i class="fas fa-magic mr-2"></i>
+                            处理图片
+                        </button>
+                        <button id="save-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 hidden">
+                            <i class="fas fa-download mr-2"></i>
+                            保存图片
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 控制面板 (图片美颜) -->
+                <div class="control-panel p-6 space-y-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">美颜控制</h2>
+                    
+                    <!-- 磨皮 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-gray-700 font-medium">磨皮</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="smooth-toggle-image">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <input type="range" id="smooth-level-image" class="slider" min="0" max="100" value="70">
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span>弱</span>
+                            <span>强</span>
+                        </div>
+                    </div>
+
+                    <!-- 美白 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-gray-700 font-medium">美白</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="whiten-toggle-image">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <input type="range" id="whiten-level-image" class="slider" min="0" max="100" value="30">
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span>弱</span>
+                            <span>强</span>
+                        </div>
+                    </div>
+
+                    <!-- 瘦脸 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-gray-700 font-medium">瘦脸</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="slim-toggle-image">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <input type="range" id="slim-level-image" class="slider" min="0" max="100" value="20">
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span>弱</span>
+                            <span>强</span>
+                        </div>
+                    </div>
+
+                    <!-- 祛痘 -->
+                    <div class="flex justify-between items-center">
+                        <label class="text-gray-700 font-medium">祛痘</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="acne-toggle-image">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 美颜参数控制 (摄像头模式)
+        const cameraControls = {
+            smooth: { toggle: 'smooth-toggle', level: 'smooth-level' },
+            whiten: { toggle: 'whiten-toggle', level: 'whiten-level' },
+            slim: { toggle: 'slim-toggle', level: 'slim-level' },
+            acne: { toggle: 'acne-toggle' }
+        };
+
+        // 美颜参数控制 (图片模式)
+        const imageControls = {
+            smooth: { toggle: 'smooth-toggle-image', level: 'smooth-level-image' },
+            whiten: { toggle: 'whiten-toggle-image', level: 'whiten-level-image' },
+            slim: { toggle: 'slim-toggle-image', level: 'slim-level-image' },
+            acne: { toggle: 'acne-toggle-image' }
+        };
+
+        // 获取当前美颜设置
+        function getBeautyOptions(mode) {
+            const options = {};
+            const controls = mode === 'camera' ? cameraControls : imageControls;
+            for (const [key, control] of Object.entries(controls)) {
+                const toggle = document.getElementById(control.toggle);
+                options[key] = toggle.checked;
+                if (control.level) {
+                    options[`${key}_level`] = document.getElementById(control.level).value / 100;
+                }
+            }
+            return options;
+        }
+
+        // 更新美颜设置
+        function updateBeautyOptions(mode) {
+            const options = getBeautyOptions(mode);
+            fetch('/api/update_beauty_options', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(options),
+            });
+        }
+
+        // 为所有控制器添加事件监听 (摄像头模式)
+        for (const control of Object.values(cameraControls)) {
+            document.getElementById(control.toggle).addEventListener('change', () => updateBeautyOptions('camera'));
+            if (control.level) {
+                document.getElementById(control.level).addEventListener('input', () => updateBeautyOptions('camera'));
+            }
+        }
+
+        // 为所有控制器添加事件监听 (图片模式)
+        for (const control of Object.values(imageControls)) {
+            document.getElementById(control.toggle).addEventListener('change', () => updateBeautyOptions('image'));
+            if (control.level) {
+                document.getElementById(control.level).addEventListener('input', () => updateBeautyOptions('image'));
+            }
+        }
+
+        // 模式切换
+        const cameraModeBtn = document.getElementById('camera-mode-btn');
+        const imageModeBtn = document.getElementById('image-mode-btn');
+        const cameraBeautySection = document.getElementById('camera-beauty-section');
+        const imageProcessingSection = document.getElementById('image-processing-section');
+        const videoFeed = document.getElementById('video-feed');
+
+        cameraModeBtn.addEventListener('click', () => {
+            cameraBeautySection.classList.remove('hidden');
+            imageProcessingSection.classList.add('hidden');
+            cameraModeBtn.classList.remove('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
+            cameraModeBtn.classList.add('bg-blue-500', 'text-white');
+            imageModeBtn.classList.remove('bg-blue-500', 'text-white');
+            imageModeBtn.classList.add('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
+            videoFeed.src = "{{ url_for('video_feed_beauty') }}"; // 启动摄像头
+        });
+
+        imageModeBtn.addEventListener('click', () => {
+            cameraBeautySection.classList.add('hidden');
+            imageProcessingSection.classList.remove('hidden');
+            imageModeBtn.classList.remove('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
+            imageModeBtn.classList.add('bg-blue-500', 'text-white');
+            cameraModeBtn.classList.remove('bg-blue-500', 'text-white');
+            cameraModeBtn.classList.add('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
+            videoFeed.src = ""; // 停止摄像头
+        });
+
+        // 拍照功能
+        const captureBtn = document.getElementById('capture-btn');
+        const folderNameInput = document.getElementById('folder-name');
+
+        captureBtn.addEventListener('click', () => {
+            const folderName = folderNameInput.value.trim();
+            if (!folderName) {
+                alert('请输入您的姓名！');
+                return;
+            }
+
+            fetch('/api/capture_frame', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ folder_name: folderName, beauty_options: getBeautyOptions('camera') }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('照片已保存到: ' + data.file_path);
+                } else {
+                    alert('保存照片失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error capturing frame:', error);
+                alert('保存照片时出错');
+            });
+        });
+
+        // 文件拖放处理
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const resultContainer = document.getElementById('result-container');
+        const processBtn = document.getElementById('process-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const originalImage = document.getElementById('original-image');
+        const processedImage = document.getElementById('processed-image');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        let selectedFile = null;
+        let selectedFileName = null;
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            if (!file.type.startsWith('image/')) {
+                alert('请选择图片文件');
+                return;
+            }
+            selectedFile = file;
+            selectedFileName = file.name.split('.')[0]; // Store filename without extension
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                originalImage.src = e.target.result;
+                processedImage.src = ''; // Clear previous processed image
+                resultContainer.classList.remove('hidden');
+                processBtn.classList.remove('hidden');
+                saveBtn.classList.add('hidden'); // Hide save button until processed
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 处理图片
+        processBtn.addEventListener('click', () => {
+            if (!selectedFile) {
+                alert('请先选择图片！');
+                return;
+            }
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+            formData.append('options', JSON.stringify(getBeautyOptions('image')));
+            formData.append('original_filename', selectedFileName); // Pass original filename
+
+            fetch('/api/process_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                processedImage.src = url;
+                saveBtn.classList.remove('hidden');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('处理图片时出错');
+            });
+        });
+
+        // 保存图片
+        saveBtn.addEventListener('click', () => {
+            if (!selectedFile || !processedImage.src) {
+                alert('没有可保存的图片！');
+                return;
+            }
+
+            // 将处理后的图片数据发送到后端保存
+            fetch(processedImage.src) // Fetch the processed image blob
+                .then(res => res.blob())
+                .then(blob => {
+                    const formData = new FormData();
+                    formData.append('image', blob, 'processed_beauty.jpg');
+                    formData.append('original_filename', selectedFileName); // Pass original filename
+
+                    fetch('/api/save_processed_image', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('图片已保存到: ' + data.file_path);
+                        } else {
+                            alert('保存图片失败: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saving processed image:', error);
+                        alert('保存图片时出错');
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching processed image blob:', error);
+                    alert('获取处理后图片失败！');
+                });
+        });
+    </script>
+</body>
+</html>
+
+            <!-- 图片处理区域 -->
+            <div id="image-processing-section" class="hidden lg:col-span-2 space-y-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">图片处理</h2>
+                
+                <!-- 文件上传区域 -->
+                <div id="drop-zone" class="file-drop-zone p-8 text-center">
+                    <div class="space-y-4">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                        <p class="text-gray-600">拖放图片到此处或点击上传</p>
+                        <input type="file" id="file-input" class="hidden" accept="image/*">
+                        <button onclick="document.getElementById('file-input').click()" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
+                            选择图片
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 处理结果展示 -->
+                <div id="result-container" class="hidden grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <p class="text-gray-700 font-medium">原图</p>
+                        <img id="original-image" class="w-full rounded-lg" alt="原图">
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-gray-700 font-medium">处理后</p>
+                        <img id="processed-image" class="w-full rounded-lg" alt="处理后">
+                    </div>
+                </div>
+
+                <!-- 图片处理按钮 -->
+                <div class="flex justify-center space-x-4">
+                    <button id="process-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
+                        <i class="fas fa-magic mr-2"></i>
+                        处理图片
+                    </button>
+                    <button id="reverse-btn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
+                        <i class="fas fa-undo mr-2"></i>
+                        逆美颜
+                    </button>
+                    <button id="save-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 hidden">
+                        <i class="fas fa-download mr-2"></i>
+                        保存图片
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 美颜参数控制
+        const controls = {
+            smooth: { toggle: 'smooth-toggle', level: 'smooth-level' },
+            whiten: { toggle: 'whiten-toggle', level: 'whiten-level' },
+            slim: { toggle: 'slim-toggle', level: 'slim-level' },
+            acne: { toggle: 'acne-toggle' }
+        };
+
+        // 获取当前美颜设置
+        function getBeautyOptions() {
+            const options = {};
+            for (const [key, control] of Object.entries(controls)) {
+                const toggle = document.getElementById(control.toggle);
+                options[key] = toggle.checked;
+                if (control.level) {
+                    options[`${key}_level`] = document.getElementById(control.level).value / 100;
+                }
+            }
+            return options;
+        }
+
+        // 更新美颜设置
+        function updateBeautyOptions() {
+            const options = getBeautyOptions();
+            fetch('/api/update_beauty_options', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(options),
+            });
+        }
+
+        // 为所有控制器添加事件监听
+        for (const control of Object.values(controls)) {
+            document.getElementById(control.toggle).addEventListener('change', updateBeautyOptions);
+            if (control.level) {
+                document.getElementById(control.level).addEventListener('input', updateBeautyOptions);
+            }
+        }
+
+        // 模式切换
+        const cameraModeBtn = document.getElementById('camera-mode-btn');
+        const imageModeBtn = document.getElementById('image-mode-btn');
+        const cameraBeautySection = document.getElementById('camera-beauty-section');
+        const imageProcessingSection = document.getElementById('image-processing-section');
+
+        cameraModeBtn.addEventListener('click', () => {
+            cameraBeautySection.classList.remove('hidden');
+            imageProcessingSection.classList.add('hidden');
+            cameraModeBtn.classList.remove('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
+            cameraModeBtn.classList.add('bg-blue-500', 'text-white');
+            imageModeBtn.classList.remove('bg-blue-500', 'text-white');
+            imageModeBtn.classList.add('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
+        });
+
+        imageModeBtn.addEventListener('click', () => {
+            cameraBeautySection.classList.add('hidden');
+            imageProcessingSection.classList.remove('hidden');
+            imageModeBtn.classList.remove('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
+            imageModeBtn.classList.add('bg-blue-500', 'text-white');
+            cameraModeBtn.classList.remove('bg-blue-500', 'text-white');
+            cameraModeBtn.classList.add('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
+        });
+
+        // 拍照功能
+        const captureBtn = document.getElementById('capture-btn');
+        const folderNameInput = document.getElementById('folder-name');
+
+        captureBtn.addEventListener('click', () => {
+            const folderName = folderNameInput.value.trim();
+            if (!folderName) {
+                alert('请输入保存文件夹名称！');
+                return;
+            }
+
+            fetch('/api/capture_frame', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ folder_name: folderName }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('照片已保存到: ' + data.file_path);
+                } else {
+                    alert('保存照片失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error capturing frame:', error);
+                alert('保存照片时出错');
+            });
+        });
+    </script>
+</body>
+</html> 
