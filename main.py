@@ -125,44 +125,66 @@ def gen_frames():
         print("Streaming stopped: model not ready.")
         return
 
-    camera = cv2.VideoCapture(0)
-    if not camera.isOpened():
-        # print("ERROR: Cannot open webcam for recognition") # Commented out
-        return
-    
-    # print("Recognition camera opened.") # Commented out
-    
     try:
+        print("正在尝试打开摄像头...")
+        camera = cv2.VideoCapture(0)
+        
+        # 尝试多个摄像头索引
+        camera_index = 0
+        while not camera.isOpened() and camera_index < 3:
+            print(f"尝试打开摄像头 {camera_index} 失败，尝试下一个...")
+            camera.release()
+            camera_index += 1
+            camera = cv2.VideoCapture(camera_index)
+        
+        if not camera.isOpened():
+            print("错误：无法打开摄像头。请检查：")
+            print("1. 摄像头是否已正确连接")
+            print("2. 是否被其他程序占用")
+            print("3. 是否有摄像头访问权限")
+            return
+        
+        print(f"成功打开摄像头 {camera_index}")
+        
+        # 设置摄像头属性
+        camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        
         face_cascade = cv2.CascadeClassifier('config/haarcascade_frontalface_alt.xml')
+        if face_cascade.empty():
+            print("错误：无法加载人脸检测模型文件")
+            return
+            
         frame_counter = 0
         last_known_faces = []
 
         while True:
             success, frame = camera.read()
             if not success:
-                # print("Failed to read frame from camera.") # Commented out
+                print("无法读取摄像头画面")
                 break
             
-            if frame_counter % 5 == 0: # Skip-frame logic
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-                last_known_faces = []
-                for (x, y, w, h) in faces:
-                    ROI = gray[y:y + h, x:x + w]
-                    ROI = cv2.resize(ROI, (img_size, img_size), interpolation=cv2.INTER_LINEAR)
-                    label, prob = face_recognition_model.predict(ROI)
-                    
-                    # Always show the most similar name, and mark as uncertain if below threshold
-                    show_name = name_list_camera[label]
-                    if prob > current_config['threshold']:
-                        show_text = f"{show_name}: {prob:.2f}"
-                        log_recognition_event(show_name, prob) # Log recognized face
-                    else:
-                        show_text = f"{show_name} (Uncertain): {prob:.2f}"
-                        # Optionally log uncertain recognitions as well
-                        # log_recognition_event(f"{show_name} (Uncertain)", prob)
-
-                    last_known_faces.append(((x, y, w, h), show_text))
+            if frame_counter % 5 == 0:
+                try:
+                    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+                    last_known_faces = []
+                    for (x, y, w, h) in faces:
+                        ROI = gray[y:y + h, x:x + w]
+                        ROI = cv2.resize(ROI, (img_size, img_size), interpolation=cv2.INTER_LINEAR)
+                        label, prob = face_recognition_model.predict(ROI)
+                        
+                        show_name = name_list_camera[label]
+                        if prob > current_config['threshold']:
+                            show_text = f"{show_name}: {prob:.2f}"
+                            log_recognition_event(show_name, prob)
+                        else:
+                            show_text = f"{show_name} (Uncertain): {prob:.2f}"
+                        
+                        last_known_faces.append(((x, y, w, h), show_text))
+                except Exception as e:
+                    print(f"处理帧时发生错误：{str(e)}")
+                    continue
             
             for (face_coords, text) in last_known_faces:
                 x, y, w, h = face_coords
@@ -170,17 +192,24 @@ def gen_frames():
                 frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
             frame_counter += 1
-            ret, buffer = cv2.imencode('.jpg', frame)
-            if not ret:
+            try:
+                ret, buffer = cv2.imencode('.jpg', frame)
+                if not ret:
+                    print("无法编码图像帧")
+                    continue
+                frame_bytes = buffer.tobytes()
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+            except Exception as e:
+                print(f"编码或传输帧时发生错误：{str(e)}")
                 continue
-            frame_bytes = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+                
     except Exception as e:
-        print(f"An error occurred during recognition streaming: {e}")
+        print(f"视频流发生错误：{str(e)}")
     finally:
-        print("Releasing recognition camera.")
+        print("正在释放摄像头...")
         camera.release()
+        print("摄像头已释放")
 
 def gen_frames_collect():
     """Generator function for video streaming during face collection. Manages its own camera instance."""
@@ -442,18 +471,26 @@ def training_worker(q):
         q.put("TRAINING_COMPLETE") # Signal for completion
 
 def train_model_thread(stop_flag):
+    """训练模型的线程函数"""
     global training_in_progress
     try:
-        train_and_save_model(stop_flag)
+        success = train_and_save_model(stop_flag, training_queue)
+        if success:
+            training_queue.put("模型训练完成！请重启应用程序以加载新模型。")
+        else:
+            training_queue.put("模型训练失败，请检查错误日志。")
+    except Exception as e:
+        training_queue.put(f"训练过程中发生错误：{str(e)}")
     finally:
         training_in_progress = False
 
 @app.route('/train', methods=['POST'])
 def train():
+    """开始训练模型的路由"""
     global training_thread, stop_training_flag, training_in_progress
 
     if training_in_progress:
-        return jsonify({'status': 'error', 'message': 'Training is already in progress.'})
+        return jsonify({'status': 'error', 'message': '训练已在进行中。'})
 
     training_in_progress = True
     stop_training_flag.clear()
@@ -461,7 +498,7 @@ def train():
     training_thread = threading.Thread(target=train_model_thread, args=(stop_training_flag,))
     training_thread.start()
 
-    return jsonify({'status': 'success', 'message': 'Training started.'})
+    return jsonify({'status': 'success', 'message': '训练已开始。'})
 
 
 @app.route('/train_status')

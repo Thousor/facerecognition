@@ -17,7 +17,7 @@ from tensorflow.keras.layers import (
     RandomFlip, RandomRotation, RandomZoom, RandomContrast, GlobalAveragePooling2D, Input, RandomBrightness
 )
 from keras.applications import ResNet50
-from keras.applications.resnet50 import preprocess_input # Import preprocess_input
+from keras.applications.resnet50 import preprocess_input
 from tensorflow.keras import regularizers
 from tensorflow.keras.optimizers.schedules import CosineDecay
 import json
@@ -88,7 +88,18 @@ class TrainingProgressCallback(tf.keras.callbacks.Callback):
             'val_accuracy': logs.get('val_accuracy')
         })
 
-class FaceRecognitionModel(object):  # 重命名自定义类
+
+class StopTrainingCallback(Callback):
+    def __init__(self, flag):
+        super(StopTrainingCallback, self).__init__()
+        self.flag = flag
+
+    def on_epoch_end(self, epoch, logs=None):
+        if self.flag and self.flag.is_set():
+            self.model.stop_training = True
+
+
+class FaceRecognitionModel:
     '''
     人脸识别模型
     '''
@@ -115,7 +126,7 @@ class FaceRecognitionModel(object):  # 重命名自定义类
         )
 
         # 解冻更多层进行微调
-        for layer in base_model.layers[:143]: # Unfreeze more layers
+        for layer in base_model.layers[:143]:
             layer.trainable = False
 
         # 构建模型
@@ -123,7 +134,7 @@ class FaceRecognitionModel(object):  # 重命名自定义类
         x = self.data_augmentation(inputs)
         
         # Apply ResNet50's specific preprocessing
-        x = preprocess_input(x) # Changed: Use preprocess_input
+        x = preprocess_input(x)
 
         # 预训练特征提取
         x = base_model(x, training=False)
@@ -135,21 +146,21 @@ class FaceRecognitionModel(object):  # 重命名自定义类
         x = Dense(2048, kernel_regularizer=regularizers.l2(1e-4))(x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
-        x = Dropout(0.6)(x) # Increase dropout
+        x = Dropout(0.6)(x)
 
         x = Dense(1024, kernel_regularizer=regularizers.l2(1e-4))(x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
-        x = Dropout(0.6)(x) # Increase dropout
+        x = Dropout(0.6)(x)
 
         outputs = Dense(self.num_classes, activation='softmax')(x)
 
         self.model = Model(inputs, outputs)
         self.model.summary()
 
-    def train_model(self, train_ds, val_ds, stop_flag, progress_queue=None):
+    def train_model(self, train_ds, val_ds, stop_flag=None, progress_queue=None):
         # 使用CosineDecay学习率调度器
-        total_steps = len(train_ds) * 300 # epochs
+        total_steps = len(train_ds) * 300  # epochs
         lr_schedule = CosineDecay(initial_learning_rate=0.0001, decay_steps=total_steps)
         
         self.model.compile(
@@ -159,49 +170,73 @@ class FaceRecognitionModel(object):  # 重命名自定义类
         )
 
         # 改进的回调函数
+        callbacks = []
+        
+        # 添加早停回调
         early_stopping = EarlyStopping(
             monitor='val_accuracy',
-            patience=25, # Increase patience
+            patience=25,
             verbose=1,
             restore_best_weights=True
         )
+        callbacks.append(early_stopping)
 
-        stop_training_callback = StopTrainingCallback(stop_flag)
-        callbacks = [early_stopping, stop_training_callback]
-        if progress_queue:
+        # 添加停止训练回调（如果提供了stop_flag）
+        if stop_flag is not None:
+            callbacks.append(StopTrainingCallback(stop_flag))
+
+        # 添加进度回调（如果提供了progress_queue）
+        if progress_queue is not None:
             callbacks.append(TrainingProgressCallback(progress_queue))
 
         # 训练模型
-        self.model.fit(
+        history = self.model.fit(
             train_ds,
-            epochs=300,  # 增加最大训练轮次
+            epochs=300,
             validation_data=val_ds,
             callbacks=callbacks
         )
+        
+        return history
 
     def evaluate(self, dataset):
-        x_test, y_test = dataset.get_test_data()
-        return self.model.evaluate(x_test, y_test)
-
-
-class StopTrainingCallback(Callback):
-    def __init__(self, flag):
-        super(StopTrainingCallback, self).__init__()
-        self.flag = flag
-
-    def on_epoch_end(self, epoch, logs=None):
-        if self.flag.is_set():
-            self.model.stop_training = True
+        """
+        评估模型性能
+        Args:
+            dataset: TensorFlow Dataset对象
+        Returns:
+            评估结果（loss和accuracy）
+        """
+        return self.model.evaluate(dataset)
 
     def save(self, file_path=MODEL_FILE_PATH):
-        print('Model Saved Finished!!!')
+        """
+        保存模型
+        Args:
+            file_path: 模型保存路径
+        """
+        print('正在保存模型...')
         self.model.save(file_path)
+        print('模型保存完成！')
 
     def load(self, file_path=MODEL_FILE_PATH):
-        print('Model Loaded Successful!!!')
+        """
+        加载模型
+        Args:
+            file_path: 模型文件路径
+        """
+        print('正在加载模型...')
         self.model = load_model(file_path)
+        print('模型加载完成！')
 
     def predict(self, img):
+        """
+        预测单张图片
+        Args:
+            img: 输入图片（numpy数组）
+        Returns:
+            (预测的类别索引, 预测的概率)
+        """
         # 确保图像是RGB格式
         if len(img.shape) == 2:  # 如果是灰度图
             img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
@@ -209,24 +244,51 @@ class StopTrainingCallback(Callback):
         img = cv2.resize(img, (self.image_size, self.image_size))
         img = np.expand_dims(img, axis=0)  # 添加批次维度
         
-        # Apply ResNet50's specific preprocessing for prediction as well
-        img = preprocess_input(img) # Changed: Apply preprocess_input here too
+        # 应用预处理
+        img = preprocess_input(img)
 
         result = self.model.predict(img)
         max_index = np.argmax(result)
         return max_index, result[0][max_index]
 
-def train_and_save_model(progress_queue=None):
-    # 获取数据集
-    train_ds, val_ds, class_names = get_datasets(DATA_DIR, IMAGE_SIZE, BATCH_SIZE)
-    num_classes = len(class_names)
 
-    # 创建并训练模型
-    face_model = FaceRecognitionModel(num_classes)
-    face_model.build_model()
-    face_model.train_model(train_ds, val_ds, progress_queue)
-    face_model.evaluate_model(val_ds)
-    face_model.save()
+def train_and_save_model(stop_flag=None, progress_queue=None):
+    """
+    训练并保存模型
+    Args:
+        stop_flag: 停止训练的标志
+        progress_queue: 进度队列，用于报告训练进度
+    """
+    try:
+        # 获取数据集
+        print('正在加载数据集...')
+        train_ds, val_ds, class_names = get_datasets(DATA_DIR, IMAGE_SIZE, BATCH_SIZE)
+        num_classes = len(class_names)
+        print(f'检测到 {num_classes} 个类别')
+
+        # 创建并训练模型
+        print('开始构建模型...')
+        face_model = FaceRecognitionModel(num_classes)
+        face_model.build_model()
+        
+        print('开始训练模型...')
+        face_model.train_model(train_ds, val_ds, stop_flag, progress_queue)
+        
+        # 评估模型
+        print('正在评估模型...')
+        loss, accuracy = face_model.evaluate(val_ds)
+        print(f'验证集评估结果 - Loss: {loss:.4f}, Accuracy: {accuracy:.4f}')
+        
+        # 保存模型
+        face_model.save()
+        
+        print('模型训练完成！')
+        return True
+        
+    except Exception as e:
+        print(f'训练过程中发生错误：{str(e)}')
+        return False
+
 
 if __name__ == '__main__':
     train_and_save_model()
