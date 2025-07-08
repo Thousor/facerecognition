@@ -64,6 +64,18 @@
                 </button>
             </div>
 
+            <!-- 训练口罩模型 -->
+            <div class="card bg-white rounded-lg shadow-md p-6">
+                <div class="text-center mb-4">
+                    <i class="fas fa-mask text-4xl text-teal-500"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-center mb-4">训练口罩模型</h2>
+                <p class="text-gray-600 text-center mb-4">训练带口罩的人脸识别模型</p>
+                <button id="train_masked_button" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    开始训练
+                </button>
+            </div>
+
             <!-- 打开摄像头识别 -->
             <div class="card bg-white rounded-lg shadow-md p-6">
                 <div class="text-center mb-4">
@@ -128,6 +140,7 @@
         <!-- 训练状态和日志 -->
         <div class="mt-8">
             <p id="status" class="text-center text-lg font-semibold mb-4"></p>
+            <p id="masked_status" class="text-center text-lg font-semibold mb-4"></p>
             <div id="training_log" class="hidden"></div>
         </div>
     </div>
@@ -135,69 +148,110 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const trainButton = document.getElementById('train_button');
+            const trainMaskedButton = document.getElementById('train_masked_button');
             const status = document.getElementById('status');
+            const maskedStatus = document.getElementById('masked_status');
             let training = false;
+            let maskedTraining = false;
 
-            function checkTrainingStatus() {
-                fetch('/train_status')
+            function checkCompletionStatus() {
+                fetch('/masked_train_completion_status')
                     .then(response => response.json())
                     .then(data => {
-                        if (training !== data.training) {
-                            training = data.training;
-                            updateButton();
+                        if (data.status === 'completed') {
+                            maskedStatus.textContent = data.message;
+                            maskedStatus.classList.remove('loading');
+                        } else {
+                            setTimeout(checkCompletionStatus, 5000); // Poll every 5 seconds
                         }
-                    })
-                    .catch(err => console.error('Error fetching training status:', err));
+                    });
+            }
+            
+            // 初始化按钮状态
+            updateButton(trainButton, false, '开始训练', '停止训练', 'green');
+            updateButton(trainMaskedButton, false, '开始训练', '停止训练', 'teal');
+
+            function checkTrainingStatus() {
+                Promise.all([
+                    fetch('/train_status').then(response => response.json()),
+                    fetch('/masked_train_status').then(response => response.json())
+                ])
+                .then(([normalData, maskedData]) => {
+                    if (training !== normalData.training) {
+                        training = normalData.training;
+                        updateButton(trainButton, training, '开始训练', '停止训练', 'green');
+                    }
+                    if (maskedTraining !== maskedData.is_training) {
+                        maskedTraining = maskedData.is_training;
+                        updateButton(trainMaskedButton, maskedTraining, '开始训练', '停止训练', 'teal');
+                    }
+                    updateStatus();
+                })
+                .catch(err => console.error('Error fetching training status:', err));
             }
 
-            function updateButton() {
-                if (training) {
-                    trainButton.textContent = '停止训练';
-                    trainButton.classList.remove('bg-green-500', 'hover:bg-green-600');
-                    trainButton.classList.add('bg-red-500', 'hover:bg-red-600');
-                    status.textContent = '模型正在训练中...';
-                    status.classList.add('loading');
-                    trainButton.disabled = false;
-                    trainButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            function updateButton(button, isTraining, startText, stopText, color) {
+                if (isTraining) {
+                    button.textContent = stopText;
+                    button.classList.remove(`bg-${color}-500`, `hover:bg-${color}-600`);
+                    button.classList.add('bg-red-500', 'hover:bg-red-600');
+                    button.disabled = false;
+                    button.classList.remove('opacity-50', 'cursor-not-allowed');
                 } else {
-                    trainButton.textContent = '开始训练';
-                    trainButton.classList.remove('bg-red-500', 'hover:bg-red-600');
-                    trainButton.classList.add('bg-green-500', 'hover:bg-green-600');
-                    status.textContent = '点击按钮开始训练模型。';
-                    status.classList.remove('loading');
-                    trainButton.disabled = false;
-                    trainButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    button.textContent = startText;
+                    button.classList.remove('bg-red-500', 'hover:bg-red-600');
+                    button.classList.add(`bg-${color}-500`, `hover:bg-${color}-600`);
+                    button.disabled = false;
+                    button.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
             }
 
-            trainButton.addEventListener('click', () => {
-                trainButton.disabled = true;
-                trainButton.classList.add('opacity-50', 'cursor-not-allowed');
+            function updateStatus() {
+                if (training && maskedTraining) {
+                    status.textContent = '正在同时训练普通模型和口罩模型...';
+                } else if (training) {
+                    status.textContent = '正在训练普通模型...';
+                } else if (maskedTraining) {
+                    status.textContent = '正在训练口罩模型...';
+                } else {
+                    status.textContent = '点击按钮开始训练模型。';
+                }
+                status.classList.toggle('loading', training || maskedTraining);
+            }
 
-                const action = training ? '/stop_training' : '/train';
-                const method = 'POST';
+            function handleTrainButtonClick(button, isTraining, startEndpoint, stopEndpoint) {
+                button.disabled = true;
+                button.classList.add('opacity-50', 'cursor-not-allowed');
 
-                fetch(action, { method: method })
+                const endpoint = isTraining ? stopEndpoint : startEndpoint;
+                fetch(endpoint, { method: 'POST' })
                     .then(response => response.json())
                     .then(data => {
                         status.textContent = data.message;
-                        // Immediately check status to update UI faster
                         checkTrainingStatus();
                     })
                     .catch(err => {
                         console.error('Error during fetch:', err);
                         status.textContent = `请求出错: ${err}`;
-                        // Re-enable button on error
-                        trainButton.disabled = false;
-                        trainButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                        button.disabled = false;
+                        button.classList.remove('opacity-50', 'cursor-not-allowed');
                     });
+            }
+
+            trainButton.addEventListener('click', () => {
+                handleTrainButtonClick(trainButton, training, '/train', '/stop_training');
             });
 
-            // Check status every 3 seconds to keep UI in sync with backend
+            trainMaskedButton.addEventListener('click', () => {
+                handleTrainButtonClick(trainMaskedButton, maskedTraining, '/train_masked_model', '/stop_masked_training');
+            });
+
+            // Check status every 3 seconds
             setInterval(checkTrainingStatus, 3000);
 
-            // Initial status check on page load
+            // Initial status check
             checkTrainingStatus();
+            checkCompletionStatus();
         });
     </script>
 </body>

@@ -29,8 +29,16 @@ import io
 from collect_data import collect_faces, process_and_save_face
 from dataHelper import read_name_list
 from faceRegnigtionModel import train_and_save_model, FaceRecognitionModel, get_datasets, IMAGE_SIZE, MODEL_FILE_PATH
+from prepare_masked_dataset import prepare_masked_dataset
+from masked_face_model import train_and_save_model as train_masked_model, MaskedFaceModel
 
 camera_active = True # Global variable to control camera stream
+
+# --- Global variables for masked model training ---
+masked_training_thread = None
+masked_stop_training_flag = threading.Event()
+masked_training_in_progress = False
+masked_model = None
 last_beauty_frame = None # Global to store the last processed frame for capture
 
 # --- Global variables for training control ---
@@ -82,7 +90,9 @@ app=Flask(__name__, static_url_path='/dataset', static_folder='dataset')
 # --- Globals ---
 # Camera is now managed within each generator function, not globally.
 face_recognition_model = None
+masked_face_model = None
 name_list_camera = []
+masked_name_list = []
 img_size = 128 # Will be updated from config
 
 # 初始化美颜处理器
@@ -98,24 +108,32 @@ beauty_options = {
 }
 
 def initialize_globals():
-    """Initializes recognition model and name list."""
-    global face_recognition_model, name_list_camera, img_size
-    # print("Initializing recognition model...") # Commented out
+    """Initializes recognition models and name list."""
+    global face_recognition_model, name_list_camera, img_size, masked_face_model, masked_name_list
     try:
         # Update globals from config
         img_size = current_config.get('image_size', 128)
 
+        # Load standard model
         name_list_camera = read_name_list(current_config['data_dir'])
-        if len(name_list_camera) > 0:
+        if len(name_list_camera) > 0 and os.path.exists(MODEL_FILE_PATH):
             face_recognition_model = FaceRecognitionModel(num_classes=len(name_list_camera))
             face_recognition_model.load()
         else:
             face_recognition_model = None
-            # print("Warning: dataset is empty. Live recognition will not work.") # Commented out
-        # print("Recognition model initialization complete.") # Commented out
+
+        # Load masked face model
+        masked_name_list = read_name_list('mask_dataset/')
+        if len(masked_name_list) > 0 and os.path.exists("masked_face.keras"):
+            masked_face_model = MaskedFaceModel(num_classes=len(masked_name_list))
+            masked_face_model.load()
+        else:
+            masked_face_model = None
+        
     except Exception as e:
-        # print(f"ERROR: Could not initialize recognition model: {e}") # Commented out
+        print(f"Error during model initialization: {e}")
         face_recognition_model = None
+        masked_face_model = None
 
 def gen_frames():
     """Generator function for video streaming. Manages its own camera instance."""
@@ -172,14 +190,30 @@ def gen_frames():
                     for (x, y, w, h) in faces:
                         ROI = gray[y:y + h, x:x + w]
                         ROI = cv2.resize(ROI, (img_size, img_size), interpolation=cv2.INTER_LINEAR)
-                        label, prob = face_recognition_model.predict(ROI)
                         
-                        show_name = name_list_camera[label]
-                        if prob > current_config['threshold']:
-                            show_text = f"{show_name}: {prob:.2f}"
-                            log_recognition_event(show_name, prob)
+                        label_unmasked, prob_unmasked = -1, 0.0
+                        if face_recognition_model:
+                            label_unmasked, prob_unmasked = face_recognition_model.predict(ROI)
+
+                        label_masked, prob_masked = -1, 0.0
+                        if masked_face_model:
+                            label_masked, prob_masked = masked_face_model.predict(ROI)
+
+                        # Heuristic to decide if a mask is worn
+                        if prob_masked > prob_unmasked and prob_masked > current_config['threshold']:
+                            # Masked model is more confident
+                            show_name = f"{masked_name_list[label_masked]} (Masked)"
+                            final_prob = prob_masked
+                            show_text = f"{show_name}: {final_prob:.2f}"
+                            log_recognition_event(show_name, final_prob)
+                        elif prob_unmasked > current_config['threshold']:
+                            # Unmasked model is more confident
+                            show_name = name_list_camera[label_unmasked]
+                            final_prob = prob_unmasked
+                            show_text = f"{show_name}: {final_prob:.2f}"
+                            log_recognition_event(show_name, final_prob)
                         else:
-                            show_text = f"{show_name} (Uncertain): {prob:.2f}"
+                            show_text = "Unknown"
                         
                         last_known_faces.append(((x, y, w, h), show_text))
                 except Exception as e:
@@ -828,6 +862,51 @@ def save_processed_image():
             'success': False, 
             'message': f'Failed to save processed image: {str(e)}'
         }), 500
+
+
+@app.route('/train_masked_model', methods=['POST'])
+def train_masked_model_route():
+    """开始训练口罩识别模型"""
+    global masked_training_thread, masked_training_in_progress, masked_stop_training_flag
+    
+    if masked_training_in_progress:
+        return jsonify({"status": "error", "message": "模型训练已在进行中"}), 400
+    
+    try:
+        # 准备带口罩的数据集
+        prepare_masked_dataset()
+        
+        # 重置停止标志
+        masked_stop_training_flag.clear()
+        masked_training_in_progress = True
+        
+        # 启动训练线程
+        masked_training_thread = threading.Thread(
+            target=train_masked_model,
+            args=('mask_dataset', masked_stop_training_flag)
+        )
+        masked_training_thread.start()
+        
+        return jsonify({"status": "success", "message": "口罩模型训练已开始"})
+    except Exception as e:
+        masked_training_in_progress = False
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/masked_train_status')
+def masked_train_status():
+    """获取口罩模型训练状态"""
+    global masked_training_in_progress
+    return jsonify({
+        "is_training": masked_training_in_progress
+    })
+
+@app.route('/stop_masked_training', methods=['POST'])
+def stop_masked_training():
+    """停止口罩模型训练"""
+    global masked_stop_training_flag, masked_training_in_progress
+    masked_stop_training_flag.set()
+    masked_training_in_progress = False
+    return jsonify({"status": "success", "message": "正在停止训练"})
 
 
 if __name__ == "__main__":
