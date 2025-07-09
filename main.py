@@ -450,125 +450,6 @@ training_queue = queue.Queue()
 training_process = None
 training_thread = None
 
-def training_worker(q):
-    q.put("Starting data preparation...")
-    # Run dataHelper.py as a subprocess
-    data_process = subprocess.Popen(
-        [sys.executable, "dataHelper.py"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        bufsize=1,
-        universal_newlines=True
-    )
-    for line in iter(data_process.stdout.readline, ''):
-        q.put(line.strip())
-    data_process.stdout.close()
-    data_process.wait()
-    
-    if data_process.returncode != 0:
-        q.put(f"Data preparation failed with exit code {data_process.returncode}")
-        q.put("TRAINING_COMPLETE") # Signal completion even on failure
-        return
-
-    q.put("Data preparation complete. Starting model training...")
-    try:
-        # 1. Load Datasets
-        q.put("Loading datasets...")
-        train_dataset, val_dataset, class_names = get_datasets(DATA_DIR, IMAGE_SIZE, BATCH_SIZE)
-        num_classes = len(class_names)
-        q.put(f"Found {num_classes} classes: {class_names}")
-
-        # 2. Build Model
-        q.put("Building model...")
-        model = FaceRecognitionModel(num_classes=num_classes)
-        model.build_model()
-
-        # 3. Train Model
-        q.put("Training model...")
-        model.train_model(train_dataset, val_dataset, progress_queue=q)
-
-        # 4. Evaluate Model
-        q.put("Evaluating model...")
-        model.evaluate_model(val_dataset)
-
-        # 5. Save Model
-        q.put("Saving model...")
-        model.save()
-        q.put("Model training and saving complete!")
-    except Exception as e:
-        q.put(f"Error during model training: {e}")
-    finally:
-        q.put("TRAINING_COMPLETE") # Signal for completion
-
-def train_model_thread(stop_flag):
-    """训练模型的线程函数"""
-    global training_in_progress
-    try:
-        success = train_and_save_model(stop_flag, training_queue)
-        if success:
-            training_queue.put("模型训练完成！请重启应用程序以加载新模型。")
-        else:
-            training_queue.put("模型训练失败，请检查错误日志。")
-    except Exception as e:
-        training_queue.put(f"训练过程中发生错误：{str(e)}")
-    finally:
-        training_in_progress = False
-
-@app.route('/train', methods=['POST'])
-def train():
-    """开始训练模型的路由"""
-    global training_thread, stop_training_flag, training_in_progress
-
-    if training_in_progress:
-        return jsonify({'status': 'error', 'message': '训练已在进行中。'})
-
-    training_in_progress = True
-    stop_training_flag.clear()
-
-    training_thread = threading.Thread(target=train_model_thread, args=(stop_training_flag,))
-    training_thread.start()
-
-    return jsonify({'status': 'success', 'message': '训练已开始。'})
-
-
-@app.route('/train_status')
-def train_status():
-    global training_in_progress
-    return jsonify({'training': training_in_progress})
-
-
-@app.route('/stop_training', methods=['POST'])
-def stop_training():
-    global stop_training_flag
-    if training_thread and training_thread.is_alive():
-        stop_training_flag.set()
-        return jsonify({'status': 'success', 'message': 'Training stop signal sent.'})
-    return jsonify({'status': 'error', 'message': 'No active training to stop.'})
-
-@app.route('/train_progress')
-def train_progress():
-    def generate():
-        while True:
-            try:
-                item = training_queue.get(timeout=1) # Wait for an item, with timeout
-                if item == "TRAINING_COMPLETE":
-                    yield f"data: Training complete! Please restart the main application (main.py) to load the new model.\n\n"
-                    break
-                elif isinstance(item, dict): # Training progress dictionary
-                    yield f"data: Epoch {item['epoch']}: Loss={item['loss']:.4f}, Accuracy={item['accuracy']:.4f}, Val_Loss={item['val_loss']:.4f}, Val_Accuracy={item['val_accuracy']:.4f}\n\n"
-                else: # String message from dataHelper.py or other general messages
-                    yield f"data: {item}\n\n"
-            except queue.Empty:
-                # No new data, keep connection alive
-                yield "data: \n" # Send a keep-alive message
-            except Exception as e:
-                print(f"An error occurred in train_progress generator: {e}")
-                yield f"data: Error: {e}\n\n"
-                break
-            time.sleep(0.1) # Small delay to prevent busy-waiting
-
-    return Response(generate(), mimetype='text/event-stream')
-
 @app.route("/users")
 def users_page():
     return render_template('users.html')
@@ -946,6 +827,12 @@ def train_worker():
     """训练工作线程"""
     global training_status, training_thread
     try:
+        # 准备口罩数据集
+        update_training_status(True, "正在准备口罩数据集...", "preparing_mask_data", 0)
+        if not prepare_masked_dataset():
+            update_training_status(False, "准备口罩数据集失败", None, 0)
+            return
+
         # 检查数据集
         if not os.path.exists('dataset/'):
             update_training_status(False, "找不到普通人脸数据集", None, 0)
