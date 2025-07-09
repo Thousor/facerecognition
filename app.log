@@ -320,3 +320,347 @@
 2025-07-09 16:35:52,401 - INFO - 127.0.0.1 - - [09/Jul/2025 16:35:52] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
 2025-07-09 16:35:53,570 - INFO - 127.0.0.1 - - [09/Jul/2025 16:35:53] "GET /show_camera HTTP/1.1" 200 -
 2025-07-09 16:36:02,172 - INFO - 127.0.0.1 - - [09/Jul/2025 16:36:02] "GET /video_feed HTTP/1.1" 200 -
+2025-07-09 17:23:05,478 - WARNING - From D:\PythonProject\face-recognition\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+2025-07-09 17:23:06,368 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 17:23:06,368 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 17:23:10,433 - INFO - 127.0.0.1 - - [09/Jul/2025 17:23:10] "GET / HTTP/1.1" 200 -
+2025-07-09 17:23:10,578 - INFO - 127.0.0.1 - - [09/Jul/2025 17:23:10] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 17:23:10,582 - INFO - 127.0.0.1 - - [09/Jul/2025 17:23:10] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-07-09 17:23:12,095 - INFO - 127.0.0.1 - - [09/Jul/2025 17:23:12] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 17:23:12,148 - INFO - 127.0.0.1 - - [09/Jul/2025 17:23:12] "[33mGET /static/makeup_styles/vFG1.png HTTP/1.1[0m" 404 -
+2025-07-09 17:23:12,149 - INFO - 127.0.0.1 - - [09/Jul/2025 17:23:12] "[33mGET /static/makeup_styles/vFG5.png HTTP/1.1[0m" 404 -
+2025-07-09 17:23:12,150 - INFO - 127.0.0.1 - - [09/Jul/2025 17:23:12] "[33mGET /static/makeup_styles/vFG9.png HTTP/1.1[0m" 404 -
+2025-07-09 17:23:12,151 - INFO - 127.0.0.1 - - [09/Jul/2025 17:23:12] "[33mGET /static/makeup_styles/XMY-002.png HTTP/1.1[0m" 404 -
+2025-07-09 17:23:12,153 - INFO - 127.0.0.1 - - [09/Jul/2025 17:23:12] "[33mGET /static/makeup_styles/XMY-003.png HTTP/1.1[0m" 404 -
+2025-07-09 17:23:12,154 - INFO - 127.0.0.1 - - [09/Jul/2025 17:23:12] "[33mGET /static/makeup_styles/87989.png HTTP/1.1[0m" 404 -
+2025-07-09 17:23:33,566 - INFO - 127.0.0.1 - - [09/Jul/2025 17:23:33] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 503 -
+2025-07-09 17:23:39,847 - INFO - 127.0.0.1 - - [09/Jul/2025 17:23:39] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 503 -
+2025-07-09 17:26:34,465 - INFO - 127.0.0.1 - - [09/Jul/2025 17:26:34] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 503 -
+2025-07-09 17:35:03,419 - WARNING - From D:\PythonProject\face-recognition\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+2025-07-09 17:35:04,683 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 17:35:04,683 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 17:35:14,178 - INFO - 127.0.0.1 - - [09/Jul/2025 17:35:14] "GET / HTTP/1.1" 200 -
+2025-07-09 17:35:14,276 - INFO - 127.0.0.1 - - [09/Jul/2025 17:35:14] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 17:35:15,556 - INFO - 127.0.0.1 - - [09/Jul/2025 17:35:15] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 17:35:15,963 - INFO - 127.0.0.1 - - [09/Jul/2025 17:35:15] "GET /static/makeup_styles/vFG1.png HTTP/1.1" 200 -
+2025-07-09 17:35:15,964 - INFO - 127.0.0.1 - - [09/Jul/2025 17:35:15] "GET /static/makeup_styles/XMY-003.png HTTP/1.1" 200 -
+2025-07-09 17:35:15,969 - INFO - 127.0.0.1 - - [09/Jul/2025 17:35:15] "GET /static/makeup_styles/vFG9.png HTTP/1.1" 200 -
+2025-07-09 17:35:15,972 - INFO - 127.0.0.1 - - [09/Jul/2025 17:35:15] "GET /static/makeup_styles/87989.png HTTP/1.1" 200 -
+2025-07-09 17:35:15,972 - INFO - 127.0.0.1 - - [09/Jul/2025 17:35:15] "GET /static/makeup_styles/XMY-002.png HTTP/1.1" 200 -
+2025-07-09 17:35:15,972 - INFO - 127.0.0.1 - - [09/Jul/2025 17:35:15] "GET /static/makeup_styles/vFG5.png HTTP/1.1" 200 -
+2025-07-09 17:35:22,485 - INFO - 127.0.0.1 - - [09/Jul/2025 17:35:22] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 503 -
+2025-07-09 17:37:12,166 - WARNING - From D:\PythonProject\face-recognition\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+2025-07-09 17:37:12,802 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 17:37:12,802 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 17:37:15,060 - INFO - 127.0.0.1 - - [09/Jul/2025 17:37:15] "GET / HTTP/1.1" 200 -
+2025-07-09 17:37:15,170 - INFO - 127.0.0.1 - - [09/Jul/2025 17:37:15] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 17:37:17,222 - INFO - 127.0.0.1 - - [09/Jul/2025 17:37:17] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 17:37:17,598 - INFO - 127.0.0.1 - - [09/Jul/2025 17:37:17] "[36mGET /static/makeup_styles/vFG1.png HTTP/1.1[0m" 304 -
+2025-07-09 17:37:17,602 - INFO - 127.0.0.1 - - [09/Jul/2025 17:37:17] "[36mGET /static/makeup_styles/vFG5.png HTTP/1.1[0m" 304 -
+2025-07-09 17:37:17,602 - INFO - 127.0.0.1 - - [09/Jul/2025 17:37:17] "[36mGET /static/makeup_styles/87989.png HTTP/1.1[0m" 304 -
+2025-07-09 17:37:17,604 - INFO - 127.0.0.1 - - [09/Jul/2025 17:37:17] "[36mGET /static/makeup_styles/vFG9.png HTTP/1.1[0m" 304 -
+2025-07-09 17:37:17,605 - INFO - 127.0.0.1 - - [09/Jul/2025 17:37:17] "[36mGET /static/makeup_styles/XMY-002.png HTTP/1.1[0m" 304 -
+2025-07-09 17:37:17,606 - INFO - 127.0.0.1 - - [09/Jul/2025 17:37:17] "[36mGET /static/makeup_styles/XMY-003.png HTTP/1.1[0m" 304 -
+2025-07-09 17:37:22,474 - INFO - 127.0.0.1 - - [09/Jul/2025 17:37:22] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 503 -
+2025-07-09 17:37:28,240 - INFO - 127.0.0.1 - - [09/Jul/2025 17:37:28] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 503 -
+2025-07-09 17:38:33,264 - WARNING - From D:\PythonProject\face-recognition\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+2025-07-09 17:38:34,157 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 17:38:34,157 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 17:38:36,106 - INFO - 127.0.0.1 - - [09/Jul/2025 17:38:36] "GET / HTTP/1.1" 200 -
+2025-07-09 17:38:36,256 - INFO - 127.0.0.1 - - [09/Jul/2025 17:38:36] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 17:38:36,267 - INFO - 127.0.0.1 - - [09/Jul/2025 17:38:36] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-07-09 17:38:37,843 - INFO - 127.0.0.1 - - [09/Jul/2025 17:38:37] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 17:38:38,208 - INFO - 127.0.0.1 - - [09/Jul/2025 17:38:38] "[36mGET /static/makeup_styles/vFG5.png HTTP/1.1[0m" 304 -
+2025-07-09 17:38:38,209 - INFO - 127.0.0.1 - - [09/Jul/2025 17:38:38] "[36mGET /static/makeup_styles/vFG1.png HTTP/1.1[0m" 304 -
+2025-07-09 17:38:38,211 - INFO - 127.0.0.1 - - [09/Jul/2025 17:38:38] "[36mGET /static/makeup_styles/XMY-003.png HTTP/1.1[0m" 304 -
+2025-07-09 17:38:38,212 - INFO - 127.0.0.1 - - [09/Jul/2025 17:38:38] "[36mGET /static/makeup_styles/vFG9.png HTTP/1.1[0m" 304 -
+2025-07-09 17:38:38,213 - INFO - 127.0.0.1 - - [09/Jul/2025 17:38:38] "[36mGET /static/makeup_styles/XMY-002.png HTTP/1.1[0m" 304 -
+2025-07-09 17:38:38,213 - INFO - 127.0.0.1 - - [09/Jul/2025 17:38:38] "[36mGET /static/makeup_styles/87989.png HTTP/1.1[0m" 304 -
+2025-07-09 17:38:42,791 - INFO - 127.0.0.1 - - [09/Jul/2025 17:38:42] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 503 -
+2025-07-09 17:38:45,082 - INFO - 127.0.0.1 - - [09/Jul/2025 17:38:45] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 503 -
+2025-07-09 17:44:24,229 - INFO - 127.0.0.1 - - [09/Jul/2025 17:44:24] "GET / HTTP/1.1" 200 -
+2025-07-09 17:44:24,286 - INFO - 127.0.0.1 - - [09/Jul/2025 17:44:24] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 17:44:24,808 - INFO - 127.0.0.1 - - [09/Jul/2025 17:44:24] "GET / HTTP/1.1" 200 -
+2025-07-09 17:44:24,826 - INFO - 127.0.0.1 - - [09/Jul/2025 17:44:24] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 18:20:27,181 - WARNING - From D:\PythonProject\face-recognition\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+2025-07-09 18:20:27,794 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 18:20:27,794 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 18:20:29,095 - INFO - 127.0.0.1 - - [09/Jul/2025 18:20:29] "GET / HTTP/1.1" 200 -
+2025-07-09 18:20:29,201 - INFO - 127.0.0.1 - - [09/Jul/2025 18:20:29] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 18:20:29,210 - INFO - 127.0.0.1 - - [09/Jul/2025 18:20:29] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-07-09 18:20:30,983 - INFO - 127.0.0.1 - - [09/Jul/2025 18:20:30] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 18:20:31,351 - INFO - 127.0.0.1 - - [09/Jul/2025 18:20:31] "[36mGET /static/makeup_styles/vFG1.png HTTP/1.1[0m" 304 -
+2025-07-09 18:20:31,358 - INFO - 127.0.0.1 - - [09/Jul/2025 18:20:31] "[36mGET /static/makeup_styles/vFG5.png HTTP/1.1[0m" 304 -
+2025-07-09 18:20:31,361 - INFO - 127.0.0.1 - - [09/Jul/2025 18:20:31] "[36mGET /static/makeup_styles/XMY-003.png HTTP/1.1[0m" 304 -
+2025-07-09 18:20:31,362 - INFO - 127.0.0.1 - - [09/Jul/2025 18:20:31] "[36mGET /static/makeup_styles/87989.png HTTP/1.1[0m" 304 -
+2025-07-09 18:20:31,363 - INFO - 127.0.0.1 - - [09/Jul/2025 18:20:31] "[36mGET /static/makeup_styles/XMY-002.png HTTP/1.1[0m" 304 -
+2025-07-09 18:20:31,363 - INFO - 127.0.0.1 - - [09/Jul/2025 18:20:31] "[36mGET /static/makeup_styles/vFG9.png HTTP/1.1[0m" 304 -
+2025-07-09 18:20:37,603 - ERROR - Makeup transfer failed: [WinError 2] ÏµÍ³ÕÒ²»µ½Ö¸¶¨µÄÎÄ¼þ¡£
+2025-07-09 18:20:37,604 - INFO - 127.0.0.1 - - [09/Jul/2025 18:20:37] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:26:20,227 - WARNING - From D:\PythonProject\face-recognition\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+2025-07-09 18:26:20,840 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 18:26:20,840 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 18:26:24,365 - INFO - 127.0.0.1 - - [09/Jul/2025 18:26:24] "GET / HTTP/1.1" 200 -
+2025-07-09 18:26:24,474 - INFO - 127.0.0.1 - - [09/Jul/2025 18:26:24] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 18:26:30,343 - INFO - 127.0.0.1 - - [09/Jul/2025 18:26:30] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 18:26:31,165 - INFO - 127.0.0.1 - - [09/Jul/2025 18:26:31] "[36mGET /static/makeup_styles/XMY-002.png HTTP/1.1[0m" 304 -
+2025-07-09 18:26:31,194 - INFO - 127.0.0.1 - - [09/Jul/2025 18:26:31] "[36mGET /static/makeup_styles/vFG1.png HTTP/1.1[0m" 304 -
+2025-07-09 18:26:31,223 - INFO - 127.0.0.1 - - [09/Jul/2025 18:26:31] "[36mGET /static/makeup_styles/vFG5.png HTTP/1.1[0m" 304 -
+2025-07-09 18:26:31,228 - INFO - 127.0.0.1 - - [09/Jul/2025 18:26:31] "[36mGET /static/makeup_styles/87989.png HTTP/1.1[0m" 304 -
+2025-07-09 18:26:31,241 - INFO - 127.0.0.1 - - [09/Jul/2025 18:26:31] "[36mGET /static/makeup_styles/vFG9.png HTTP/1.1[0m" 304 -
+2025-07-09 18:26:31,245 - INFO - 127.0.0.1 - - [09/Jul/2025 18:26:31] "[36mGET /static/makeup_styles/XMY-003.png HTTP/1.1[0m" 304 -
+2025-07-09 18:26:34,297 - ERROR - ÐéÄâ»·¾³ÖÐµÄPython½âÊÍÆ÷²»´æÔÚ£¡ÇëÈ·ÈÏÂ·¾¶£ºD:\PythonProject\face-recognition-001\tf_env\Scripts\python.exe
+2025-07-09 18:26:34,298 - INFO - 127.0.0.1 - - [09/Jul/2025 18:26:34] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:28:27,850 - WARNING - From D:\PythonProject\face-recognition\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+2025-07-09 18:28:28,466 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 18:28:28,466 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 18:28:29,882 - INFO - 127.0.0.1 - - [09/Jul/2025 18:28:29] "GET / HTTP/1.1" 200 -
+2025-07-09 18:28:29,993 - INFO - 127.0.0.1 - - [09/Jul/2025 18:28:29] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 18:28:31,175 - INFO - 127.0.0.1 - - [09/Jul/2025 18:28:31] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 18:28:31,567 - INFO - 127.0.0.1 - - [09/Jul/2025 18:28:31] "[36mGET /static/makeup_styles/vFG1.png HTTP/1.1[0m" 304 -
+2025-07-09 18:28:31,569 - INFO - 127.0.0.1 - - [09/Jul/2025 18:28:31] "[36mGET /static/makeup_styles/87989.png HTTP/1.1[0m" 304 -
+2025-07-09 18:28:31,570 - INFO - 127.0.0.1 - - [09/Jul/2025 18:28:31] "[36mGET /static/makeup_styles/vFG9.png HTTP/1.1[0m" 304 -
+2025-07-09 18:28:31,571 - INFO - 127.0.0.1 - - [09/Jul/2025 18:28:31] "[36mGET /static/makeup_styles/XMY-002.png HTTP/1.1[0m" 304 -
+2025-07-09 18:28:31,572 - INFO - 127.0.0.1 - - [09/Jul/2025 18:28:31] "[36mGET /static/makeup_styles/vFG5.png HTTP/1.1[0m" 304 -
+2025-07-09 18:28:31,574 - INFO - 127.0.0.1 - - [09/Jul/2025 18:28:31] "[36mGET /static/makeup_styles/XMY-003.png HTTP/1.1[0m" 304 -
+2025-07-09 18:28:35,258 - ERROR - TensorFlowÏîÄ¿µÄmain.py½Å±¾²»´æÔÚ£¡ÇëÈ·ÈÏÂ·¾¶£ºD:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py
+2025-07-09 18:28:35,268 - INFO - 127.0.0.1 - - [09/Jul/2025 18:28:35] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:29:36,856 - WARNING - From D:\PythonProject\face-recognition\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+2025-07-09 18:29:37,509 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 18:29:37,509 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 18:29:38,740 - INFO - 127.0.0.1 - - [09/Jul/2025 18:29:38] "GET / HTTP/1.1" 200 -
+2025-07-09 18:29:38,870 - INFO - 127.0.0.1 - - [09/Jul/2025 18:29:38] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 18:29:39,794 - INFO - 127.0.0.1 - - [09/Jul/2025 18:29:39] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 18:29:40,211 - INFO - 127.0.0.1 - - [09/Jul/2025 18:29:40] "[36mGET /static/makeup_styles/vFG9.png HTTP/1.1[0m" 304 -
+2025-07-09 18:29:40,215 - INFO - 127.0.0.1 - - [09/Jul/2025 18:29:40] "[36mGET /static/makeup_styles/vFG5.png HTTP/1.1[0m" 304 -
+2025-07-09 18:29:40,215 - INFO - 127.0.0.1 - - [09/Jul/2025 18:29:40] "[36mGET /static/makeup_styles/vFG1.png HTTP/1.1[0m" 304 -
+2025-07-09 18:29:40,217 - INFO - 127.0.0.1 - - [09/Jul/2025 18:29:40] "[36mGET /static/makeup_styles/XMY-003.png HTTP/1.1[0m" 304 -
+2025-07-09 18:29:40,218 - INFO - 127.0.0.1 - - [09/Jul/2025 18:29:40] "[36mGET /static/makeup_styles/87989.png HTTP/1.1[0m" 304 -
+2025-07-09 18:29:40,219 - INFO - 127.0.0.1 - - [09/Jul/2025 18:29:40] "[36mGET /static/makeup_styles/XMY-002.png HTTP/1.1[0m" 304 -
+2025-07-09 18:29:44,041 - ERROR - TensorFlowÏîÄ¿µÄmain.py½Å±¾²»´æÔÚ£¡ÇëÈ·ÈÏÂ·¾¶£ºD:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py
+2025-07-09 18:29:44,042 - INFO - 127.0.0.1 - - [09/Jul/2025 18:29:44] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:30:10,904 - INFO - Running command: D:\PythonProject\face-recognition-001\tf_env\Scripts\python.exe D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py --action test --source_path D:\PythonProject\face-recognition-001\temp_uploads\18.jpg --reference_path D:\PythonProject\face-recognition-001\static\makeup_styles\XMY-003.png --output_path D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 18:30:10,952 - ERROR - TensorFlow script failed.
+2025-07-09 18:30:10,952 - ERROR - STDOUT: 
+2025-07-09 18:30:10,952 - ERROR - STDERR: Traceback (most recent call last):
+  File "D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py", line 1, in <module>
+    import tensorflow as tf
+ModuleNotFoundError: No module named 'tensorflow'
+
+2025-07-09 18:30:10,952 - ERROR - Makeup transfer failed: ×±ÈÝÇ¨ÒÆ×Ó³ÌÐòÖ´ÐÐÊ§°Ü¡£Çë²é¿´app.logÁË½âÏêÇé¡£
+2025-07-09 18:30:10,952 - INFO - 127.0.0.1 - - [09/Jul/2025 18:30:10] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:32:55,242 - INFO - Running command: D:\PythonProject\face-recognition-001\tf_env\Scripts\python.exe D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py --action test --source_path D:\PythonProject\face-recognition-001\temp_uploads\18.jpg --reference_path D:\PythonProject\face-recognition-001\static\makeup_styles\XMY-003.png --output_path D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 18:32:55,288 - ERROR - TensorFlow script failed.
+2025-07-09 18:32:55,288 - ERROR - STDOUT: 
+2025-07-09 18:32:55,288 - ERROR - STDERR: Traceback (most recent call last):
+  File "D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py", line 1, in <module>
+    import tensorflow as tf
+ModuleNotFoundError: No module named 'tensorflow'
+
+2025-07-09 18:32:55,288 - ERROR - Makeup transfer failed: ×±ÈÝÇ¨ÒÆ×Ó³ÌÐòÖ´ÐÐÊ§°Ü¡£Çë²é¿´app.logÁË½âÏêÇé¡£
+2025-07-09 18:32:55,288 - INFO - 127.0.0.1 - - [09/Jul/2025 18:32:55] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:32:57,514 - INFO - Running command: D:\PythonProject\face-recognition-001\tf_env\Scripts\python.exe D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py --action test --source_path D:\PythonProject\face-recognition-001\temp_uploads\18.jpg --reference_path D:\PythonProject\face-recognition-001\static\makeup_styles\XMY-003.png --output_path D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 18:32:57,554 - ERROR - TensorFlow script failed.
+2025-07-09 18:32:57,554 - ERROR - STDOUT: 
+2025-07-09 18:32:57,554 - ERROR - STDERR: Traceback (most recent call last):
+  File "D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py", line 1, in <module>
+    import tensorflow as tf
+ModuleNotFoundError: No module named 'tensorflow'
+
+2025-07-09 18:32:57,554 - ERROR - Makeup transfer failed: ×±ÈÝÇ¨ÒÆ×Ó³ÌÐòÖ´ÐÐÊ§°Ü¡£Çë²é¿´app.logÁË½âÏêÇé¡£
+2025-07-09 18:32:57,554 - INFO - 127.0.0.1 - - [09/Jul/2025 18:32:57] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:44:29,711 - ERROR - TensorFlowÏîÄ¿µÄmain.py½Å±¾²»´æÔÚ£¡ÇëÈ·ÈÏÂ·¾¶£ºD:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py
+2025-07-09 18:44:29,711 - INFO - 127.0.0.1 - - [09/Jul/2025 18:44:29] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:44:42,961 - INFO - Running command: D:\PythonProject\face-recognition-001\tf_env\Scripts\python.exe D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py --action test --source_path D:\PythonProject\face-recognition-001\temp_uploads\18.jpg --reference_path D:\PythonProject\face-recognition-001\static\makeup_styles\XMY-003.png --output_path D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 18:44:45,371 - ERROR - TensorFlow script failed.
+2025-07-09 18:44:45,371 - ERROR - STDOUT: 
+2025-07-09 18:44:45,371 - ERROR - STDERR: Traceback (most recent call last):
+  File "D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py", line 5, in <module>
+    from imageio import imread, imsave
+ModuleNotFoundError: No module named 'imageio'
+
+2025-07-09 18:44:45,371 - ERROR - Makeup transfer failed: ×±ÈÝÇ¨ÒÆ×Ó³ÌÐòÖ´ÐÐÊ§°Ü¡£Çë²é¿´app.logÁË½âÏêÇé¡£
+2025-07-09 18:44:45,371 - INFO - 127.0.0.1 - - [09/Jul/2025 18:44:45] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:45:49,149 - INFO - Running command: D:\PythonProject\face-recognition-001\tf_env\Scripts\python.exe D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py --action test --source_path D:\PythonProject\face-recognition-001\temp_uploads\18.jpg --reference_path D:\PythonProject\face-recognition-001\static\makeup_styles\XMY-003.png --output_path D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 18:45:51,088 - ERROR - TensorFlow script failed.
+2025-07-09 18:45:51,088 - ERROR - STDOUT: 
+2025-07-09 18:45:51,088 - ERROR - STDERR: Traceback (most recent call last):
+  File "D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py", line 5, in <module>
+    from imageio import imread, imsave
+ModuleNotFoundError: No module named 'imageio'
+
+2025-07-09 18:45:51,088 - ERROR - Makeup transfer failed: ×±ÈÝÇ¨ÒÆ×Ó³ÌÐòÖ´ÐÐÊ§°Ü¡£Çë²é¿´app.logÁË½âÏêÇé¡£
+2025-07-09 18:45:51,088 - INFO - 127.0.0.1 - - [09/Jul/2025 18:45:51] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:46:32,669 - INFO - Running command: D:\PythonProject\face-recognition-001\tf_env\Scripts\python.exe D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py --action test --source_path D:\PythonProject\face-recognition-001\temp_uploads\18.jpg --reference_path D:\PythonProject\face-recognition-001\static\makeup_styles\XMY-003.png --output_path D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 18:46:34,906 - ERROR - TensorFlow script failed.
+2025-07-09 18:46:34,906 - ERROR - STDOUT: 
+2025-07-09 18:46:34,906 - ERROR - STDERR: Traceback (most recent call last):
+  File "D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py", line 8, in <module>
+    from tqdm import tqdm
+ModuleNotFoundError: No module named 'tqdm'
+
+2025-07-09 18:46:34,906 - ERROR - Makeup transfer failed: ×±ÈÝÇ¨ÒÆ×Ó³ÌÐòÖ´ÐÐÊ§°Ü¡£Çë²é¿´app.logÁË½âÏêÇé¡£
+2025-07-09 18:46:34,906 - INFO - 127.0.0.1 - - [09/Jul/2025 18:46:34] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:47:21,952 - INFO - Running command: D:\PythonProject\face-recognition-001\tf_env\Scripts\python.exe D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py --action test --source_path D:\PythonProject\face-recognition-001\temp_uploads\18.jpg --reference_path D:\PythonProject\face-recognition-001\static\makeup_styles\XMY-003.png --output_path D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 18:47:24,117 - ERROR - TensorFlow script failed.
+2025-07-09 18:47:24,117 - ERROR - STDOUT: [0m
+2025-07-09 18:47:24,117 - ERROR - STDERR: Traceback (most recent call last):
+  File "D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py", line 11, in <module>
+    import matplotlib.pyplot as plt
+ModuleNotFoundError: No module named 'matplotlib'
+
+2025-07-09 18:47:24,117 - ERROR - Makeup transfer failed: ×±ÈÝÇ¨ÒÆ×Ó³ÌÐòÖ´ÐÐÊ§°Ü¡£Çë²é¿´app.logÁË½âÏêÇé¡£
+2025-07-09 18:47:24,117 - INFO - 127.0.0.1 - - [09/Jul/2025 18:47:24] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:48:04,354 - INFO - Running command: D:\PythonProject\face-recognition-001\tf_env\Scripts\python.exe D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py --action test --source_path D:\PythonProject\face-recognition-001\temp_uploads\18.jpg --reference_path D:\PythonProject\face-recognition-001\static\makeup_styles\XMY-003.png --output_path D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 18:48:06,938 - ERROR - TensorFlow script failed.
+2025-07-09 18:48:06,938 - ERROR - STDOUT: [0m
+2025-07-09 18:48:06,938 - ERROR - STDERR: usage: main.py [-h] [--no_makeup NO_MAKEUP] [--makeup_dir MAKEUP_DIR]
+               [--model_path MODEL_PATH] [--output OUTPUT]
+               [--img_size IMG_SIZE]
+main.py: error: unrecognized arguments: --action test --source_path D:\PythonProject\face-recognition-001\temp_uploads\18.jpg --reference_path D:\PythonProject\face-recognition-001\static\makeup_styles\XMY-003.png --output_path D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+
+2025-07-09 18:48:06,938 - ERROR - Makeup transfer failed: ×±ÈÝÇ¨ÒÆ×Ó³ÌÐòÖ´ÐÐÊ§°Ü¡£Çë²é¿´app.logÁË½âÏêÇé¡£
+2025-07-09 18:48:06,938 - INFO - 127.0.0.1 - - [09/Jul/2025 18:48:06] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 18:51:07,485 - WARNING - From D:\PythonProject\face-recognition\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+2025-07-09 18:51:08,100 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 18:51:08,100 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 18:51:09,463 - INFO - 127.0.0.1 - - [09/Jul/2025 18:51:09] "GET / HTTP/1.1" 200 -
+2025-07-09 18:51:09,587 - INFO - 127.0.0.1 - - [09/Jul/2025 18:51:09] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 18:51:09,592 - INFO - 127.0.0.1 - - [09/Jul/2025 18:51:09] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-07-09 18:51:10,914 - INFO - 127.0.0.1 - - [09/Jul/2025 18:51:10] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 18:51:11,308 - INFO - 127.0.0.1 - - [09/Jul/2025 18:51:11] "[36mGET /static/makeup_styles/vFG5.png HTTP/1.1[0m" 304 -
+2025-07-09 18:51:11,312 - INFO - 127.0.0.1 - - [09/Jul/2025 18:51:11] "[36mGET /static/makeup_styles/vFG1.png HTTP/1.1[0m" 304 -
+2025-07-09 18:51:11,315 - INFO - 127.0.0.1 - - [09/Jul/2025 18:51:11] "[36mGET /static/makeup_styles/vFG9.png HTTP/1.1[0m" 304 -
+2025-07-09 18:51:11,317 - INFO - 127.0.0.1 - - [09/Jul/2025 18:51:11] "[36mGET /static/makeup_styles/87989.png HTTP/1.1[0m" 304 -
+2025-07-09 18:51:11,318 - INFO - 127.0.0.1 - - [09/Jul/2025 18:51:11] "[36mGET /static/makeup_styles/XMY-003.png HTTP/1.1[0m" 304 -
+2025-07-09 18:51:11,318 - INFO - 127.0.0.1 - - [09/Jul/2025 18:51:11] "[36mGET /static/makeup_styles/XMY-002.png HTTP/1.1[0m" 304 -
+2025-07-09 18:51:16,908 - INFO - Running command: D:\PythonProject\face-recognition-001\tf_env\Scripts\python.exe D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py --no_makeup D:\PythonProject\face-recognition-001\temp_uploads\18.jpg --makeup_dir D:\PythonProject\face-recognition-001\static\makeup_styles\vFG9.png --output D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 18:51:19,489 - ERROR - TensorFlow script ran but did not create output file at: D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 18:51:19,490 - ERROR - STDOUT: ÔÚ D:\PythonProject\face-recognition-001\static\makeup_styles\vFG9.png ÖÐÎ´ÕÒµ½×±ÈÝÍ¼Ïñ
+[0m
+2025-07-09 18:51:19,490 - ERROR - STDERR: D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py:52: DeprecationWarning: Starting with ImageIO v3 the behavior of this function will switch to that of iio.v3.imread. To keep the current behavior (and make this warning disappear) use `import imageio.v2 as imageio` or call `imageio.v2.imread` directly.
+  img = cv2.resize(imread(path), (size, size))
+
+2025-07-09 18:51:19,490 - ERROR - Makeup transfer failed: TensorFlow½Å±¾Ö´ÐÐ³É¹¦£¬µ«Î´ÕÒµ½Êä³öÍ¼Æ¬¡£
+2025-07-09 18:51:19,490 - INFO - 127.0.0.1 - - [09/Jul/2025 18:51:19] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 19:14:41,051 - WARNING - From D:\PythonProject\face-recognition\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+2025-07-09 19:14:41,660 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 19:14:41,661 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 19:14:43,026 - INFO - 127.0.0.1 - - [09/Jul/2025 19:14:43] "GET / HTTP/1.1" 200 -
+2025-07-09 19:14:43,144 - INFO - 127.0.0.1 - - [09/Jul/2025 19:14:43] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 19:14:43,149 - INFO - 127.0.0.1 - - [09/Jul/2025 19:14:43] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-07-09 19:14:44,468 - INFO - 127.0.0.1 - - [09/Jul/2025 19:14:44] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 19:14:44,849 - INFO - 127.0.0.1 - - [09/Jul/2025 19:14:44] "[36mGET /static/makeup_styles/vFG5.png HTTP/1.1[0m" 304 -
+2025-07-09 19:14:44,858 - INFO - 127.0.0.1 - - [09/Jul/2025 19:14:44] "[36mGET /static/makeup_styles/87989.png HTTP/1.1[0m" 304 -
+2025-07-09 19:14:44,860 - INFO - 127.0.0.1 - - [09/Jul/2025 19:14:44] "[36mGET /static/makeup_styles/XMY-003.png HTTP/1.1[0m" 304 -
+2025-07-09 19:14:44,861 - INFO - 127.0.0.1 - - [09/Jul/2025 19:14:44] "[36mGET /static/makeup_styles/vFG1.png HTTP/1.1[0m" 304 -
+2025-07-09 19:14:44,862 - INFO - 127.0.0.1 - - [09/Jul/2025 19:14:44] "[36mGET /static/makeup_styles/vFG9.png HTTP/1.1[0m" 304 -
+2025-07-09 19:14:44,862 - INFO - 127.0.0.1 - - [09/Jul/2025 19:14:44] "[36mGET /static/makeup_styles/XMY-002.png HTTP/1.1[0m" 304 -
+2025-07-09 19:14:51,119 - INFO - Running command: D:\PythonProject\face-recognition-001\tf_env\Scripts\python.exe D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py --no_makeup D:\PythonProject\face-recognition-001\temp_uploads\18.jpg --makeup_dir D:\PythonProject\face-recognition-001\temp_uploads\style --output D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 19:14:53,834 - ERROR - TensorFlow script ran but did not create output file at: D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 19:14:53,834 - ERROR - STDOUT: ÕÒµ½ 1 ¸ö×±ÈÝÍ¼Ïñ
+¼ÓÔØÄ£ÐÍÊ§°Ü: File format not supported: filepath=model\model. Keras 3 only supports V3 `.keras` files and legacy H5 format files (`.h5` extension). Note that the legacy SavedModel format is not supported by `load_model()` in Keras 3. In order to reload a TensorFlow SavedModel as an inference-only layer in Keras 3, use `keras.layers.TFSMLayer(model\model, call_endpoint='serving_default')` (note that your `call_endpoint` might have a different name).
+[0m
+2025-07-09 19:14:53,834 - ERROR - STDERR: D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py:52: DeprecationWarning: Starting with ImageIO v3 the behavior of this function will switch to that of iio.v3.imread. To keep the current behavior (and make this warning disappear) use `import imageio.v2 as imageio` or call `imageio.v2.imread` directly.
+  img = cv2.resize(imread(path), (size, size))
+
+2025-07-09 19:14:53,834 - ERROR - Makeup transfer failed: TensorFlow½Å±¾Ö´ÐÐ³É¹¦£¬µ«Î´ÕÒµ½Êä³öÍ¼Æ¬¡£
+2025-07-09 19:14:53,844 - INFO - 127.0.0.1 - - [09/Jul/2025 19:14:53] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 19:18:20,709 - WARNING - From D:\PythonProject\face-recognition\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+2025-07-09 19:18:21,321 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 19:18:21,321 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 19:18:22,918 - INFO - 127.0.0.1 - - [09/Jul/2025 19:18:22] "GET / HTTP/1.1" 200 -
+2025-07-09 19:18:23,030 - INFO - 127.0.0.1 - - [09/Jul/2025 19:18:23] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 19:18:23,985 - INFO - 127.0.0.1 - - [09/Jul/2025 19:18:23] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 19:18:24,390 - INFO - 127.0.0.1 - - [09/Jul/2025 19:18:24] "[36mGET /static/makeup_styles/vFG5.png HTTP/1.1[0m" 304 -
+2025-07-09 19:18:24,393 - INFO - 127.0.0.1 - - [09/Jul/2025 19:18:24] "[36mGET /static/makeup_styles/vFG1.png HTTP/1.1[0m" 304 -
+2025-07-09 19:18:24,397 - INFO - 127.0.0.1 - - [09/Jul/2025 19:18:24] "[36mGET /static/makeup_styles/87989.png HTTP/1.1[0m" 304 -
+2025-07-09 19:18:24,398 - INFO - 127.0.0.1 - - [09/Jul/2025 19:18:24] "[36mGET /static/makeup_styles/XMY-002.png HTTP/1.1[0m" 304 -
+2025-07-09 19:18:24,398 - INFO - 127.0.0.1 - - [09/Jul/2025 19:18:24] "[36mGET /static/makeup_styles/XMY-003.png HTTP/1.1[0m" 304 -
+2025-07-09 19:18:24,399 - INFO - 127.0.0.1 - - [09/Jul/2025 19:18:24] "[36mGET /static/makeup_styles/vFG9.png HTTP/1.1[0m" 304 -
+2025-07-09 19:18:29,943 - INFO - Running command: D:\PythonProject\face-recognition-001\tf_env\Scripts\python.exe D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py --no_makeup D:\PythonProject\face-recognition-001\temp_uploads\18.jpg --makeup_dir D:\PythonProject\face-recognition-001\temp_uploads\style --output D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\results\18_makeup.png
+2025-07-09 19:18:32,850 - ERROR - TensorFlow script failed.
+2025-07-09 19:18:32,850 - ERROR - STDOUT: ÕÒµ½ 1 ¸ö×±ÈÝÍ¼Ïñ
+[0m
+2025-07-09 19:18:32,850 - ERROR - STDERR: Traceback (most recent call last):
+  File "D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py", line 128, in <module>
+    main()
+  File "D:\PythonProject\face-recognition-001\BeautyGAN-TensorFlow-master\main.py", line 78, in main
+    with tf.Session() as sess:
+         ^^^^^^^^^^
+AttributeError: module 'tensorflow' has no attribute 'Session'. Did you mean: 'version'?
+
+2025-07-09 19:18:32,850 - ERROR - Makeup transfer failed: ×±ÈÝÇ¨ÒÆ×Ó³ÌÐòÖ´ÐÐÊ§°Ü¡£Çë²é¿´app.logÁË½âÏêÇé¡£
+2025-07-09 19:18:32,850 - INFO - 127.0.0.1 - - [09/Jul/2025 19:18:32] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 19:29:23,984 - WARNING - From D:\PythonProject\face-recognition\.venv\Lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+2025-07-09 19:29:24,749 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 19:29:24,749 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 19:29:26,264 - INFO - 127.0.0.1 - - [09/Jul/2025 19:29:26] "GET / HTTP/1.1" 200 -
+2025-07-09 19:29:26,380 - INFO - 127.0.0.1 - - [09/Jul/2025 19:29:26] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 19:29:27,493 - INFO - 127.0.0.1 - - [09/Jul/2025 19:29:27] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 19:29:27,924 - INFO - 127.0.0.1 - - [09/Jul/2025 19:29:27] "[36mGET /static/makeup_styles/vFG9.png HTTP/1.1[0m" 304 -
+2025-07-09 19:29:27,926 - INFO - 127.0.0.1 - - [09/Jul/2025 19:29:27] "[36mGET /static/makeup_styles/87989.png HTTP/1.1[0m" 304 -
+2025-07-09 19:29:27,928 - INFO - 127.0.0.1 - - [09/Jul/2025 19:29:27] "[36mGET /static/makeup_styles/XMY-002.png HTTP/1.1[0m" 304 -
+2025-07-09 19:29:27,929 - INFO - 127.0.0.1 - - [09/Jul/2025 19:29:27] "[36mGET /static/makeup_styles/vFG1.png HTTP/1.1[0m" 304 -
+2025-07-09 19:29:27,931 - INFO - 127.0.0.1 - - [09/Jul/2025 19:29:27] "[36mGET /static/makeup_styles/vFG5.png HTTP/1.1[0m" 304 -
+2025-07-09 19:29:27,931 - INFO - 127.0.0.1 - - [09/Jul/2025 19:29:27] "[36mGET /static/makeup_styles/XMY-003.png HTTP/1.1[0m" 304 -
+2025-07-09 19:29:32,001 - ERROR - Makeup transfer failed: 'NoneType' object is not callable
+2025-07-09 19:29:32,001 - INFO - 127.0.0.1 - - [09/Jul/2025 19:29:32] "[35m[1mPOST /api/makeup_transfer HTTP/1.1[0m" 500 -
+2025-07-09 20:04:21,035 - WARNING - From D:\PythonProject\face-recognition-001\makeup_transfer_tf.py:37: The name tf.train.import_meta_graph is deprecated. Please use tf.compat.v1.train.import_meta_graph instead.
+
+2025-07-09 20:04:21,666 - INFO - Restoring parameters from D:/PythonProject/face-recognition-001/model\model
+2025-07-09 20:04:22,082 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 20:04:22,082 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 20:04:23,580 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:23] "GET / HTTP/1.1" 200 -
+2025-07-09 20:04:23,692 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:23] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 20:04:24,953 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:24] "GET /makeup_transfer HTTP/1.1" 200 -
+2025-07-09 20:04:25,335 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:25] "[36mGET /static/makeup_styles/vFG1.png HTTP/1.1[0m" 304 -
+2025-07-09 20:04:25,342 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:25] "[36mGET /static/makeup_styles/vFG9.png HTTP/1.1[0m" 304 -
+2025-07-09 20:04:25,344 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:25] "[36mGET /static/makeup_styles/vFG5.png HTTP/1.1[0m" 304 -
+2025-07-09 20:04:25,346 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:25] "[36mGET /static/makeup_styles/XMY-002.png HTTP/1.1[0m" 304 -
+2025-07-09 20:04:25,346 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:25] "[36mGET /static/makeup_styles/XMY-003.png HTTP/1.1[0m" 304 -
+2025-07-09 20:04:25,347 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:25] "[36mGET /static/makeup_styles/87989.png HTTP/1.1[0m" 304 -
+2025-07-09 20:04:31,002 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:31] "POST /api/makeup_transfer HTTP/1.1" 200 -
+2025-07-09 20:04:31,013 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:31] "GET /static/makeup_results/18_makeup.png?t=1752062671010 HTTP/1.1" 200 -
+2025-07-09 20:04:37,225 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:37] "GET /static/makeup_results/18_makeup.png HTTP/1.1" 200 -
+2025-07-09 20:04:49,917 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:49] "POST /api/makeup_transfer HTTP/1.1" 200 -
+2025-07-09 20:04:49,917 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:49] "GET /static/makeup_results/18_makeup.png?t=1752062689921 HTTP/1.1" 200 -
+2025-07-09 20:04:53,649 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:53] "POST /api/makeup_transfer HTTP/1.1" 200 -
+2025-07-09 20:04:53,653 - INFO - 127.0.0.1 - - [09/Jul/2025 20:04:53] "GET /static/makeup_results/18_makeup.png?t=1752062693652 HTTP/1.1" 200 -
+2025-07-09 20:05:16,090 - INFO - 127.0.0.1 - - [09/Jul/2025 20:05:16] "POST /api/makeup_transfer HTTP/1.1" 200 -
+2025-07-09 20:05:16,095 - INFO - 127.0.0.1 - - [09/Jul/2025 20:05:16] "GET /static/makeup_results/18_makeup.png?t=1752062716095 HTTP/1.1" 200 -
+2025-07-09 20:05:29,131 - INFO - 127.0.0.1 - - [09/Jul/2025 20:05:29] "POST /api/makeup_transfer HTTP/1.1" 200 -
+2025-07-09 20:05:29,131 - INFO - 127.0.0.1 - - [09/Jul/2025 20:05:29] "GET /static/makeup_results/18_makeup.png?t=1752062729135 HTTP/1.1" 200 -
+2025-07-09 20:05:31,589 - INFO - 127.0.0.1 - - [09/Jul/2025 20:05:31] "POST /api/makeup_transfer HTTP/1.1" 200 -
+2025-07-09 20:05:31,596 - INFO - 127.0.0.1 - - [09/Jul/2025 20:05:31] "GET /static/makeup_results/18_makeup.png?t=1752062731593 HTTP/1.1" 200 -
+2025-07-09 20:06:10,738 - INFO - 127.0.0.1 - - [09/Jul/2025 20:06:10] "POST /api/makeup_transfer HTTP/1.1" 200 -
+2025-07-09 20:06:10,748 - INFO - 127.0.0.1 - - [09/Jul/2025 20:06:10] "GET /static/makeup_results/18_makeup.png?t=1752062770748 HTTP/1.1" 200 -
+2025-07-09 20:07:20,693 - INFO - 127.0.0.1 - - [09/Jul/2025 20:07:20] "POST /api/makeup_transfer HTTP/1.1" 200 -
+2025-07-09 20:07:20,699 - INFO - 127.0.0.1 - - [09/Jul/2025 20:07:20] "GET /static/makeup_results/18_makeup.png?t=1752062840700 HTTP/1.1" 200 -
+2025-07-09 20:08:13,623 - INFO - 127.0.0.1 - - [09/Jul/2025 20:08:13] "GET / HTTP/1.1" 200 -
+2025-07-09 20:08:13,668 - INFO - 127.0.0.1 - - [09/Jul/2025 20:08:13] "GET /train_status HTTP/1.1" 200 -
