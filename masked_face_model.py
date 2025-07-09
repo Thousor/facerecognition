@@ -34,6 +34,14 @@ MASKED_MODEL_PATH = "masked_face.keras"
 
 def get_datasets(data_dir, image_size, batch_size):
     """创建训练和验证数据集"""
+    # Count total images to determine validation split accurately
+    total_images = 0
+    for root, _, files in os.walk(data_dir):
+        total_images += len([f for f in files if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp'))])
+
+    train_size = int(total_images * 0.8)
+    val_size = total_images - train_size
+
     train_ds = tf.keras.utils.image_dataset_from_directory(
         data_dir,
         validation_split=0.2,
@@ -61,7 +69,7 @@ def get_datasets(data_dir, image_size, batch_size):
     train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
     val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
-    return train_ds, val_ds, class_names
+    return train_ds, val_ds, class_names, train_size, val_size
 
 
 class StopTrainingCallback(Callback):
@@ -131,10 +139,10 @@ class MaskedFaceModel:
         self.model = Model(inputs, outputs)
         self.model.summary()
 
-    def train_model(self, train_ds, val_ds, stop_flag=None, progress_queue=None):
+    def train_model(self, train_ds, val_ds, stop_flag=None, progress_queue=None, train_size=None, val_size=None):
         """训练模型"""
         # 配置优化器和学习率
-        total_steps = len(train_ds) * 300
+        total_steps = (train_size // BATCH_SIZE) * 300
         lr_schedule = CosineDecay(initial_learning_rate=0.0001, decay_steps=total_steps)
 
         self.model.compile(
@@ -160,18 +168,32 @@ class MaskedFaceModel:
             callbacks.append(StopTrainingCallback(stop_flag))
 
         # 训练模型
+        print(f"train_size: {train_size}, BATCH_SIZE: {BATCH_SIZE}")
+        steps_per_epoch = int(np.ceil(train_size // BATCH_SIZE)) if train_size is not None else None
+        validation_steps = int(np.ceil(val_size // BATCH_SIZE)) if val_size is not None else None
+
         history = self.model.fit(
             train_ds,
             epochs=300,
+            steps_per_epoch=steps_per_epoch,
             validation_data=val_ds,
+            validation_steps=validation_steps,
             callbacks=callbacks
         )
 
         return history
 
-    def evaluate(self, dataset):
-        """评估模型"""
-        return self.model.evaluate(dataset)
+    def evaluate(self, dataset, num_samples=None):
+        """
+        评估模型
+        Args:
+            dataset: TensorFlow Dataset对象
+            num_samples: 数据集中的样本数量
+        Returns:
+            评估结果（loss和accuracy）
+        """
+        steps = int(np.ceil(num_samples / BATCH_SIZE)) if num_samples is not None else None
+        return self.model.evaluate(dataset, steps=steps)
 
     def save(self, file_path=MASKED_MODEL_PATH):
         """保存模型"""
@@ -196,8 +218,9 @@ class MaskedFaceModel:
         img = np.expand_dims(img, axis=0)
         img = preprocess_input(img)
 
-        # 进行预测
+        # 使用Keras模型进行预测
         result = self.model.predict(img)
+
         max_index = np.argmax(result)
         return max_index, result[0][max_index]
 
@@ -206,7 +229,7 @@ def train_and_save_model(data_dir, stop_flag=None, progress_queue=None):
     """训练并保存模型的主函数"""
     try:
         print('正在加载数据集...')
-        train_ds, val_ds, class_names = get_datasets(data_dir, IMAGE_SIZE, BATCH_SIZE)
+        train_ds, val_ds, class_names, train_size, val_size = get_datasets(data_dir, IMAGE_SIZE, BATCH_SIZE)
         num_classes = len(class_names)
         print(f'检测到 {num_classes} 个类别')
 
@@ -215,10 +238,10 @@ def train_and_save_model(data_dir, stop_flag=None, progress_queue=None):
         model.build_model()
 
         print('开始训练模型...')
-        model.train_model(train_ds, val_ds, stop_flag, progress_queue)
+        model.train_model(train_ds, val_ds, stop_flag, progress_queue, train_size, val_size)
 
         print('正在评估模型...')
-        loss, accuracy = model.evaluate(val_ds)
+        loss, accuracy = model.evaluate(val_ds, val_size)
         print(f'验证集评估结果 - Loss: {loss:.4f}, Accuracy: {accuracy:.4f}')
 
         model.save()

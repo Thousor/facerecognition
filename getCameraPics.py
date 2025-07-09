@@ -55,6 +55,5 @@ def cameraAutoForPictures(saveDir='data/'):
     cv2.destroyAllWindows()  
  
  
-if __name__=='__main__':   
-    #xxx替换为自己的名字
-    cameraAutoForPictures(saveDir='data/guanxijing/')
+if __name__=='__main__':
+    cameraAutoForPictures(saveDir='data/')
