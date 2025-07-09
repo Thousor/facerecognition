@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>妆容迁移</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .preview-img {
+            width: 100%;
+            height: 256px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            border: 2px dashed #d1d5db;
+        }
+        .makeup-style-img {
+            cursor: pointer;
+            border: 4px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+        .makeup-style-img.selected {
+            border-color: #3b82f6; /* blue-500 */
+        }
+        .loader {
+            border-top-color: #3498db;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800">妆容迁移</h1>
+            <p class="text-gray-600 mt-2">选择一张自己的照片和一款妆容，即刻体验AI上妆。</p>
+            <a href="/" class="text-blue-500 hover:text-blue-700 mt-4 inline-block"><i class="fas fa-arrow-left"></i> 返回主页</a>
+        </header>
+
+        <div class="bg-white rounded-lg shadow-xl p-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 1. 上传照片 -->
+                <div class="flex flex-col items-center">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">1. 上传你的照片</h2>
+                    <img id="preview_no_makeup" src="https://via.placeholder.com/256" alt="No-makeup preview" class="preview-img mb-4">
+                    <input type="file" id="no_makeup_input" accept="image/*" class="hidden">
+                    <button id="upload_button" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                        <i class="fas fa-upload"></i> 选择图片
+                    </button>
+                </div>
+
+                <!-- 2. 选择妆容 -->
+                <div class="flex flex-col items-center">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">2. 选择心仪妆容</h2>
+                    <div id="makeup_gallery" class="grid grid-cols-3 gap-2">
+                        <!-- Makeup styles will be loaded here by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- 3. 查看结果 -->
+                <div class="flex flex-col items-center">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">3. 查看魔法效果</h2>
+                    <div id="result_container" class="relative w-full">
+                        <img id="preview_result" src="https://via.placeholder.com/256" alt="Result preview" class="preview-img">
+                        <div id="loader" class="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center hidden">
+                            <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
+                        </div>
+                    </div>
+                    <button id="transfer_button" class="w-full mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 opacity-50 cursor-not-allowed" disabled>
+                        <i class="fas fa-magic"></i> 开始转换
+                    </button>
+                    <a id="save_button" href="#" download="makeup_result.png" class="w-full mt-2 text-center bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 hidden">
+                        <i class="fas fa-save"></i> 保存图片
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadButton = document.getElementById('upload_button');
+            const noMakeupInput = document.getElementById('no_makeup_input');
+            const previewNoMakeup = document.getElementById('preview_no_makeup');
+            const makeupGallery = document.getElementById('makeup_gallery');
+            const transferButton = document.getElementById('transfer_button');
+            const previewResult = document.getElementById('preview_result');
+            const saveButton = document.getElementById('save_button');
+            const loader = document.getElementById('loader');
+
+            let selectedNoMakeupFile = null;
+            let selectedMakeupStyle = null;
+
+            const makeupStyles = [
+                'vFG1.png', 'vFG5.png', 'vFG9.png', 
+                'XMY-002.png', 'XMY-003.png', '87989.png'
+            ];
+
+            // Load makeup styles into the gallery
+            makeupStyles.forEach(style => {
+                const img = document.createElement('img');
+                img.src = `/static/makeup_styles/${style}`;
+                img.alt = `Makeup style ${style}`;
+                img.classList.add('makeup-style-img', 'w-full', 'h-20', 'object-cover', 'rounded');
+                img.dataset.style = style;
+                img.addEventListener('click', () => {
+                    // Remove selection from others
+                    document.querySelectorAll('.makeup-style-img').forEach(i => i.classList.remove('selected'));
+                    // Add selection to clicked one
+                    img.classList.add('selected');
+                    selectedMakeupStyle = style;
+                    checkIfReady();
+                });
+                makeupGallery.appendChild(img);
+            });
+
+            uploadButton.addEventListener('click', () => noMakeupInput.click());
+
+            noMakeupInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    selectedNoMakeupFile = this.files[0];
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        previewNoMakeup.src = e.target.result;
+                    }
+                    reader.readAsDataURL(selectedNoMakeupFile);
+                    checkIfReady();
+                }
+            });
+
+            function checkIfReady() {
+                if (selectedNoMakeupFile && selectedMakeupStyle) {
+                    transferButton.disabled = false;
+                    transferButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    transferButton.disabled = true;
+                    transferButton.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            transferButton.addEventListener('click', async function() {
+                if (!selectedNoMakeupFile || !selectedMakeupStyle) {
+                    alert('请先上传您的照片并选择一个妆容风格。');
+                    return;
+                }
+
+                loader.classList.remove('hidden');
+                transferButton.disabled = true;
+                saveButton.classList.add('hidden');
+
+                const formData = new FormData();
+                formData.append('no_makeup_image', selectedNoMakeupFile);
+                formData.append('makeup_style', selectedMakeupStyle);
+
+                try {
+                    const response = await fetch('/api/makeup_transfer', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || '妆容迁移失败');
+                    }
+
+                    const data = await response.json();
+                    previewResult.src = data.result_path + '?t=' + new Date().getTime(); // Add timestamp to break cache
+                    saveButton.href = data.result_path;
+                    saveButton.classList.remove('hidden');
+
+                } catch (error) {
+                    alert('发生错误: ' + error.message);
+                } finally {
+                    loader.classList.add('hidden');
+                    transferButton.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

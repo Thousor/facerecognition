@@ -41,6 +41,7 @@ last_beauty_frame = None # Global to store the last processed frame for capture
 training_thread = None
 stop_training_flag = threading.Event()
 training_in_progress = False
+
 # Imports from the model and camera demo
 from faceRegnigtionModel import FaceRecognitionModel, TrainingProgressCallback, get_datasets, IMAGE_SIZE, BATCH_SIZE, DATA_DIR, Model
 from dataHelper import read_name_list
@@ -74,7 +75,7 @@ def save_config(config_data):
 def log_recognition_event(name, confidence):
     """Logs a recognition event to a file."""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    log_entry = f"{timestamp}, {name}, {confidence:.2f}\n"
+    log_entry = "{}, {}, {:.2f}\n".format(timestamp, name, confidence)
     with open(RECOGNITION_LOG_FILE, 'a') as f:
         f.write(log_entry)
 
@@ -127,7 +128,7 @@ def initialize_globals():
             masked_face_model = None
         
     except Exception as e:
-        print(f"Error during model initialization: {e}")
+        print("Error during model initialization: {}".format(e))
         face_recognition_model = None
         masked_face_model = None
 
@@ -235,7 +236,7 @@ def gen_frames():
                 continue
                 
     except Exception as e:
-        print(f"视频流发生错误：{str(e)}")
+        print("视频流发生错误：{}".format(str(e)))
     finally:
         print("正在释放摄像头...")
         camera.release()
@@ -889,7 +890,7 @@ def get_training_status():
             
             update_training_status(
                 True,
-                f"正在训练{'普通' if current_phase == 'normal' else '口罩'}模型 - Epoch {progress_data.get('epoch')}/300",
+                "正在训练{}模型 - Epoch {}/300".format('普通' if current_phase == 'normal' else '口罩', progress_data.get('epoch')),
                 current_phase,
                 base_progress + epoch_progress
             )
@@ -933,27 +934,101 @@ def start_training():
         "message": "训练已开始"
     })
 
+
 @app.route('/stop_training', methods=['POST'])
 def stop_training_route():
     """停止训练"""
     global training_thread, training_status
-    
+
     # 如果没有正在进行的训练，返回错误
     if not training_thread or not training_thread.is_alive():
         return jsonify({
             "status": "error",
             "message": "没有正在进行的训练"
         })
-    
+
     # 设置停止标志
     stop_training_flag.set()
     update_training_status(True, "正在停止训练...", "stopping", training_status.get('progress', 0))
-    
+
     return jsonify({
         "status": "success",
         "message": "训练停止信号已发送"
     })
 
+
+# --- Makeup Transfer Routes ---
+@app.route('/makeup_transfer')
+def makeup_transfer_page():
+    return render_template('makeup_transfer.html')
+
+
+@app.route('/api/makeup_transfer', methods=['POST'])
+def api_makeup_transfer():
+    global beauty_gan_model
+
+    if beauty_gan_model is None:
+        return jsonify({'status': 'error', 'message': '妆容迁移模型未加载，请检查路径或等待管理员提供。'}), 503
+
+    if 'no_makeup_image' not in request.files:
+        return jsonify({'status': 'error', 'message': '未找到上传的原始图片文件。'}), 400
+
+    file = request.files['no_makeup_image']
+    makeup_style = request.form.get('makeup_style')
+
+    if file.filename == '':
+        return jsonify({'status': 'error', 'message': '未选择原始图片文件。'}), 400
+
+    if not makeup_style:
+        return jsonify({'status': 'error', 'message': '未选择妆容风格。'}), 400
+
+    try:
+        # Save the uploaded (no-makeup) file temporarily
+        temp_dir = 'temp_uploads'
+        os.makedirs(temp_dir, exist_ok=True)
+        no_makeup_filename = secure_filename(file.filename)
+        no_makeup_path = os.path.join(temp_dir, no_makeup_filename)
+        file.save(no_makeup_path)
+
+        # Construct paths
+        makeup_style_path = os.path.join('static/makeup_styles', makeup_style)
+
+        # Define output path
+        output_dir = 'static/makeup_results'
+        os.makedirs(output_dir, exist_ok=True)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_filename = f"result_{timestamp}.png"
+        output_path = os.path.join(output_dir, output_filename)
+
+        # Perform the transfer
+        transfer_makeup(beauty_gan_model, no_makeup_path, makeup_style_path, output_path)
+
+        # Clean up temporary uploaded file
+        os.remove(no_makeup_path)
+
+        return jsonify({'status': 'success', 'result_path': f'/{output_path}'})
+    except Exception as e:
+        logger.error(f"Makeup transfer failed: {str(e)}")
+        return jsonify({'status': 'error', 'message': f'处理失败: {str(e)}'}), 500
+
+
+def initialize_beauty_gan_model():
+    """Loads the BeautyGAN model at startup."""
+    global beauty_gan_model
+
+    if not os.path.exists(BEAUTY_GAN_MODEL_PATH):
+        print("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("!!! WARNING: BeautyGAN Model Not Found               !!!")
+        print(f"!!! Please place the model file at: {BEAUTY_GAN_MODEL_PATH} !!!")
+        print("!!! The Makeup Transfer feature will NOT work.       !!!")
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+    else:
+        try:
+            print("Loading BeautyGAN model...")
+            beauty_gan_model = load_beauty_gan_model(BEAUTY_GAN_MODEL_PATH)
+            print("BeautyGAN model loaded successfully.")
+        except Exception as e:
+            print(f"Error loading BeautyGAN model: {e}")
 
 if __name__ == "__main__":
     initialize_globals()
