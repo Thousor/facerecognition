@@ -196,7 +196,7 @@ class FaceRecognitionModel:
             validation_data=val_ds,
             callbacks=callbacks
         )
-        
+
         return history
 
     def evaluate(self, dataset):

@@ -1,13 +1,7 @@
 #!/usr/bin/env python
 #encoding:utf-8
 from __future__ import division
-
-"""
-功能： 将人脸识别模型暴露为web服务接口，用于演示的demo
-"""
-
 import os
-import cv2
 import sys
 import time
 import queue
@@ -25,6 +19,8 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, R
 from werkzeug.utils import secure_filename
 from beauty_processor import BeautyProcessor
 import io
+import logging
+from queue import Queue
 
 from collect_data import collect_faces, process_and_save_face
 from dataHelper import read_name_list
@@ -907,6 +903,169 @@ def stop_masked_training():
     masked_stop_training_flag.set()
     masked_training_in_progress = False
     return jsonify({"status": "success", "message": "正在停止训练"})
+
+# 从模型文件中导入训练函数
+from faceRegnigtionModel import train_and_save_model as train_normal_model
+from masked_face_model import train_and_save_model as train_masked_model
+
+# 配置日志记录器
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('app.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# 全局变量
+training_status = {
+    "is_training": False,
+    "message": "点击按钮开始训练模型",
+    "phase": None,
+    "progress": 0
+}
+training_thread = None
+stop_training_flag = threading.Event()
+progress_queue = Queue()
+
+def update_training_status(is_training, message, phase=None, progress=None):
+    """更新训练状态的辅助函数"""
+    global training_status
+    training_status.update({
+        "is_training": is_training,
+        "message": message,
+        "phase": phase
+    })
+    if progress is not None:
+        training_status["progress"] = progress
+    logger.info(f"Training status updated: {training_status}")
+
+def train_worker():
+    """训练工作线程"""
+    global training_status, training_thread
+    try:
+        # 检查数据集
+        if not os.path.exists('dataset/'):
+            update_training_status(False, "找不到普通人脸数据集", None, 0)
+            return
+        if not os.path.exists('mask_dataset/'):
+            update_training_status(False, "找不到口罩数据集", None, 0)
+            return
+
+        # 开始训练普通模型
+        update_training_status(True, "正在训练普通模型...", "normal", 0)
+        success = train_normal_model(stop_training_flag, progress_queue)
+        
+        if stop_training_flag.is_set():
+            update_training_status(False, "训练已停止", None, 25)
+            return
+            
+        if not success:
+            update_training_status(False, "普通模型训练失败", None, 25)
+            return
+
+        # 开始训练口罩模型
+        update_training_status(True, "正在训练口罩模型...", "masked", 50)
+        success = train_masked_model('mask_dataset/', stop_training_flag, progress_queue)
+        
+        if stop_training_flag.is_set():
+            update_training_status(False, "训练已停止", None, 75)
+            return
+            
+        if success:
+            update_training_status(False, "所有模型训练完成！", None, 100)
+        else:
+            update_training_status(False, "口罩模型训练失败", None, 75)
+            
+    except Exception as e:
+        error_msg = f"训练过程中发生错误: {str(e)}"
+        logger.error(error_msg)
+        update_training_status(False, error_msg, None, 0)
+    finally:
+        training_thread = None
+
+@app.route('/train_status')
+def get_training_status():
+    """获取训练状态"""
+    global training_status, training_thread, progress_queue
+    
+    # 检查进度队列
+    while not progress_queue.empty():
+        progress_data = progress_queue.get()
+        if isinstance(progress_data, dict):
+            # 更新训练状态
+            current_phase = training_status.get('phase')
+            base_progress = 0 if current_phase == 'normal' else 50
+            epoch_progress = (progress_data.get('epoch', 0) / 300) * 50  # 假设最大 epoch 为 300
+            
+            update_training_status(
+                True,
+                f"正在训练{'普通' if current_phase == 'normal' else '口罩'}模型 - Epoch {progress_data.get('epoch')}/300",
+                current_phase,
+                base_progress + epoch_progress
+            )
+    
+    # 检查训练线程是否存在且已结束
+    if training_thread and not training_thread.is_alive() and training_status['is_training']:
+        update_training_status(
+            False,
+            '训练已完成' if not stop_training_flag.is_set() else '训练已停止',
+            None,
+            training_status.get('progress', 0)
+        )
+    
+    return jsonify(training_status)
+
+@app.route('/train', methods=['POST'])
+def start_training():
+    """开始训练"""
+    global training_thread, training_status, stop_training_flag, progress_queue
+    
+    # 如果已经在训练中，返回错误
+    if training_thread and training_thread.is_alive():
+        return jsonify({
+            "status": "error",
+            "message": "训练已经在进行中"
+        })
+    
+    # 重置状态
+    stop_training_flag.clear()
+    while not progress_queue.empty():
+        progress_queue.get()
+    
+    update_training_status(True, "正在初始化训练环境...", "preparing", 0)
+    
+    # 创建并启动训练线程
+    training_thread = threading.Thread(target=train_worker)
+    training_thread.start()
+    
+    return jsonify({
+        "status": "success",
+        "message": "训练已开始"
+    })
+
+@app.route('/stop_training', methods=['POST'])
+def stop_training_route():
+    """停止训练"""
+    global training_thread, training_status
+    
+    # 如果没有正在进行的训练，返回错误
+    if not training_thread or not training_thread.is_alive():
+        return jsonify({
+            "status": "error",
+            "message": "没有正在进行的训练"
+        })
+    
+    # 设置停止标志
+    stop_training_flag.set()
+    update_training_status(True, "正在停止训练...", "stopping", training_status.get('progress', 0))
+    
+    return jsonify({
+        "status": "success",
+        "message": "训练停止信号已发送"
+    })
 
 
 if __name__ == "__main__":

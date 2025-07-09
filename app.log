@@ -1,0 +1,51 @@
+2025-07-09 15:43:51,960 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 15:43:51,960 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 15:43:59,620 - INFO - 127.0.0.1 - - [09/Jul/2025 15:43:59] "GET / HTTP/1.1" 200 -
+2025-07-09 15:43:59,748 - INFO - 127.0.0.1 - - [09/Jul/2025 15:43:59] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 15:43:59,752 - INFO - 127.0.0.1 - - [09/Jul/2025 15:43:59] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-07-09 15:44:01,019 - INFO - 127.0.0.1 - - [09/Jul/2025 15:44:01] "POST /train HTTP/1.1" 200 -
+2025-07-09 15:44:01,026 - INFO - 127.0.0.1 - - [09/Jul/2025 15:44:01] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 15:44:09,287 - INFO - 127.0.0.1 - - [09/Jul/2025 15:44:09] "POST /train HTTP/1.1" 200 -
+2025-07-09 15:44:11,190 - INFO - 127.0.0.1 - - [09/Jul/2025 15:44:11] "POST /train HTTP/1.1" 200 -
+2025-07-09 15:44:17,597 - INFO - 127.0.0.1 - - [09/Jul/2025 15:44:17] "GET /show_camera HTTP/1.1" 200 -
+2025-07-09 15:44:33,574 - INFO - 127.0.0.1 - - [09/Jul/2025 15:44:33] "GET /video_feed HTTP/1.1" 200 -
+2025-07-09 15:44:52,582 - INFO - 127.0.0.1 - - [09/Jul/2025 15:44:52] "GET / HTTP/1.1" 200 -
+2025-07-09 15:44:52,639 - INFO - 127.0.0.1 - - [09/Jul/2025 15:44:52] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 15:46:20,991 - INFO - 127.0.0.1 - - [09/Jul/2025 15:46:20] "POST /train HTTP/1.1" 200 -
+2025-07-09 15:46:21,000 - INFO - 127.0.0.1 - - [09/Jul/2025 15:46:21] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 15:50:04,043 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 15:50:04,043 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 15:50:05,451 - INFO - 127.0.0.1 - - [09/Jul/2025 15:50:05] "GET / HTTP/1.1" 200 -
+2025-07-09 15:50:05,564 - INFO - 127.0.0.1 - - [09/Jul/2025 15:50:05] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 15:50:05,568 - INFO - 127.0.0.1 - - [09/Jul/2025 15:50:05] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-07-09 15:50:06,593 - INFO - 127.0.0.1 - - [09/Jul/2025 15:50:06] "POST /train HTTP/1.1" 200 -
+2025-07-09 15:50:06,603 - INFO - 127.0.0.1 - - [09/Jul/2025 15:50:06] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 15:58:58,282 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 15:58:58,282 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 15:58:59,914 - INFO - 127.0.0.1 - - [09/Jul/2025 15:58:59] "GET / HTTP/1.1" 200 -
+2025-07-09 15:59:00,026 - INFO - 127.0.0.1 - - [09/Jul/2025 15:59:00] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 15:59:00,030 - INFO - 127.0.0.1 - - [09/Jul/2025 15:59:00] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-07-09 15:59:02,678 - INFO - 127.0.0.1 - - [09/Jul/2025 15:59:02] "POST /train HTTP/1.1" 200 -
+2025-07-09 15:59:02,682 - INFO - 127.0.0.1 - - [09/Jul/2025 15:59:02] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 16:13:58,211 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.244.4.19:5000
+2025-07-09 16:13:58,211 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 16:13:58,212 - INFO -  * Restarting with stat
+2025-07-09 16:14:03,931 - WARNING -  * Debugger is active!
+2025-07-09 16:14:03,936 - INFO -  * Debugger PIN: 625-559-131
+2025-07-09 16:14:16,191 - INFO - 127.0.0.1 - - [09/Jul/2025 16:14:16] "[33mGET / HTTP/1.1[0m" 404 -
+2025-07-09 16:16:56,966 - INFO -  * Detected change in 'D:\\PythonProject\\face-recognition-001\\faceRegnigtionModel.py', reloading
+2025-07-09 16:16:57,770 - INFO -  * Restarting with stat
+2025-07-09 16:17:52,439 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-07-09 16:17:52,439 - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 16:17:53,834 - INFO - 127.0.0.1 - - [09/Jul/2025 16:17:53] "GET / HTTP/1.1" 200 -
+2025-07-09 16:17:53,952 - INFO - 127.0.0.1 - - [09/Jul/2025 16:17:53] "GET /train_status HTTP/1.1" 200 -
+2025-07-09 16:17:53,956 - INFO - 127.0.0.1 - - [09/Jul/2025 16:17:53] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-07-09 16:17:55,347 - INFO - 127.0.0.1 - - [09/Jul/2025 16:17:55] "POST /train HTTP/1.1" 200 -
+2025-07-09 16:17:55,352 - INFO - 127.0.0.1 - - [09/Jul/2025 16:17:55] "GET /train_status HTTP/1.1" 200 -
