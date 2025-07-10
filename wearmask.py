@@ -189,16 +189,23 @@ def process_dataset(input_dir, output_dir):
 
     # 遍历输入目录
     for root, dirs, files in os.walk(input_dir):
+        # 获取当前处理的子目录相对于input_dir的路径
+        relative_path = os.path.relpath(root, input_dir)
+        output_subdir = os.path.join(output_dir, relative_path)
+
+        # 如果目标子目录已经存在，则跳过整个子目录的处理
+        if os.path.exists(output_subdir) and len(os.listdir(output_subdir)) > 0:
+            print(f"跳过目录 {root}：目标口罩目录 {output_subdir} 已存在且不为空。")
+            continue
+
+        # 创建输出子目录
+        if not os.path.exists(output_subdir):
+            os.makedirs(output_subdir)
+
         for name in files:
             if name.lower().endswith(('.png', '.jpg', '.jpeg')):
                 # 构建输入和输出路径
                 input_path = os.path.join(root, name)
-                relative_path = os.path.relpath(root, input_dir)
-                output_subdir = os.path.join(output_dir, relative_path)
-
-                # 创建输出子目录
-                if not os.path.exists(output_subdir):
-                    os.makedirs(output_subdir)
 
                 # 构建输出文件路径
                 output_path = os.path.join(output_subdir, f"masked_{name}")
@@ -242,4 +249,5 @@ if __name__ == '__main__':
             # add the file path to the list
             file_paths.append(os.path.join("data", person, file))
             # wear mask
-            wear_mask(os.path.join("data", person, file), file, masked_face_dir)
+            masker = FaceMasker(os.path.join("data", person, file), save_path=os.path.join(masked_face_dir, f"masked_{file}"))
+            masker.mask()

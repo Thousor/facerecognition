@@ -28,9 +28,11 @@ IMAGE_SIZE = current_config.get('image_size', 128)
 
 def read_name_list(path):
     name_list = []
-    for child_dir in os.listdir(path):
-        name_list.append(child_dir)
-    return name_list
+    if os.path.exists(path):
+        for child_dir in os.listdir(path):
+            if os.path.isdir(os.path.join(path, child_dir)): # Ensure it's a directory
+                name_list.append(child_dir)
+    return sorted(name_list) # Ensure alphabetical order
 
 
 def readAllImg(path,*suffix):
@@ -94,22 +96,33 @@ def readPicSaveFace(sourcePath,objectPath,*suffix):
         person_name = os.path.basename(sourcePath.strip('/')).replace('/', '')
         # print(f'Successfully processed {count-1} faces for {person_name} to {objectPath}') # Commented out
 
-if __name__ == '__main__':
-    # print('dataProcessing!!!') # Commented out
-    data_root_dir = 'data/'
-    dataset_root_dir = 'dataset/'
-    
-    # Define common image suffixes
+def prepare_dataset_from_data_dir(data_root_dir='data/', dataset_root_dir='dataset/'):
+    """
+    将data目录中的图片处理并保存到dataset目录中。
+    如果dataset中已存在同名文件夹，则跳过。
+    """
+    print(f"开始准备数据集：从 {data_root_dir} 到 {dataset_root_dir}")
     image_suffixes = ('.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '.tiff', '.TIFF')
 
-    # Iterate through all subdirectories in the data_root_dir
+    if not os.path.exists(data_root_dir):
+        print(f"错误：源目录 {data_root_dir} 不存在。")
+        return False
+    
+    if not os.path.exists(dataset_root_dir):
+        os.makedirs(dataset_root_dir)
+
     for person_name in os.listdir(data_root_dir):
         source_path = os.path.join(data_root_dir, person_name)
         object_path = os.path.join(dataset_root_dir, person_name)
         
-        # Check if it's a directory before processing
         if os.path.isdir(source_path):
             if os.path.exists(object_path):
-                # print(f"Skipping {person_name}: Destination directory {object_path} already exists.") # Commented out
+                print(f"跳过 {person_name}：目标目录 {object_path} 已存在。")
                 continue
+            print(f"正在处理 {person_name} 的数据...")
             readPicSaveFace(source_path, object_path, *image_suffixes)
+    print("数据集准备完成。")
+    return True
+
+if __name__ == '__main__':
+    prepare_dataset_from_data_dir()

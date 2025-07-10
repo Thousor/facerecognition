@@ -104,6 +104,7 @@ masked_face_model = None
 name_list_camera = []
 masked_name_list = []
 img_size = 128  # Will be updated from config
+camera_active = True # Global variable to control camera activity
 
 # 初始化美颜处理器
 beauty_processor = BeautyProcessor()
@@ -127,22 +128,35 @@ def initialize_globals():
 
         # Load standard model
         name_list_camera = read_name_list(current_config['data_dir'])
+        print(f"DEBUG: name_list_camera length: {len(name_list_camera)}")
+        print(f"DEBUG: MODEL_FILE_PATH ({MODEL_FILE_PATH}) exists: {os.path.exists(MODEL_FILE_PATH)}")
         if len(name_list_camera) > 0 and os.path.exists(MODEL_FILE_PATH):
+            print("DEBUG: Attempting to load face_recognition_model...")
             face_recognition_model = FaceRecognitionModel(num_classes=len(name_list_camera))
             face_recognition_model.load()
+            print(f"DEBUG: face_recognition_model loaded: {face_recognition_model is not None}")
         else:
             face_recognition_model = None
+            print("DEBUG: face_recognition_model not loaded due to conditions.")
 
         # Load masked face model
         masked_name_list = read_name_list('mask_dataset/')
+        print(f"DEBUG: masked_name_list length: {len(masked_name_list)}")
+        print(f"DEBUG: masked_face.keras exists: {os.path.exists('masked_face.keras')}")
         if len(masked_name_list) > 0 and os.path.exists("masked_face.keras"):
+            print("DEBUG: Attempting to load masked_face_model...")
             masked_face_model = MaskedFaceModel(num_classes=len(masked_name_list))
             masked_face_model.load()
+            print(f"DEBUG: masked_face_model loaded: {masked_face_model is not None}")
         else:
             masked_face_model = None
+            print("DEBUG: masked_face_model not loaded due to conditions.")
 
     except Exception as e:
+        import traceback
         print(f"Error during model initialization: {e}")
+        traceback.print_exc() # Print full traceback to console
+        logging.error(f"Error during model initialization: {e}", exc_info=True) # Log to file with traceback
         face_recognition_model = None
         masked_face_model = None
 
@@ -213,6 +227,8 @@ def gen_frames():
                         if masked_face_model:
                             label_masked, prob_masked = masked_face_model.predict(ROI)
 
+                        print(f"DEBUG: Prob Unmasked: {prob_unmasked:.4f}, Prob Masked: {prob_masked:.4f}")
+
                         # Heuristic to decide if a mask is worn
                         if prob_masked > prob_unmasked and prob_masked > current_config['threshold']:
                             # Masked model is more confident
@@ -228,6 +244,7 @@ def gen_frames():
                             log_recognition_event(show_name, final_prob)
                         else:
                             show_text = "Unknown"
+                        print(f"DEBUG: Final decision: {show_text}")
 
                         last_known_faces.append(((x, y, w, h), show_text))
                 except Exception as e:
@@ -863,6 +880,13 @@ def train_worker():
     """训练工作线程"""
     global training_status, training_thread
     try:
+        # 准备普通人脸数据集
+        update_training_status(True, "正在准备普通人脸数据集...", "preparing_normal_data", 0)
+        from dataHelper import prepare_dataset_from_data_dir # Import here to avoid circular dependency issues if any
+        if not prepare_dataset_from_data_dir():
+            update_training_status(False, "准备普通人脸数据集失败", None, 0)
+            return
+
         # 准备口罩数据集
         update_training_status(True, "正在准备口罩数据集...", "preparing_mask_data", 0)
         if not prepare_masked_dataset():
@@ -1064,5 +1088,6 @@ def api_makeup_transfer():
 
 
 if __name__ == "__main__":
-    initialize_globals()
     app.run(debug=True, threaded=True, use_reloader=False)
+
+initialize_globals() # Moved here to ensure it's called when Flask app starts

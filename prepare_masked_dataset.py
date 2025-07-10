@@ -18,13 +18,10 @@ def prepare_masked_dataset(input_dir='data', output_dir='mask_dataset'):
         if not os.path.exists(input_dir):
             raise ValueError(f"输入目录 {input_dir} 不存在！")
 
-        # 清理并重建输出目录
-        if os.path.exists(output_dir):
-            print(f"正在清理旧的口罩数据集: {output_dir}")
-            shutil.rmtree(output_dir)
-        
-        print(f"正在创建空的输出目录: {output_dir}")
-        os.makedirs(output_dir)
+        # 确保输出目录存在
+        if not os.path.exists(output_dir):
+            print(f"正在创建输出目录: {output_dir}")
+            os.makedirs(output_dir)
 
         # 直接处理数据集，将结果存入输出目录
         print(f"正在从 {input_dir} 生成口罩图片到 {output_dir}...")
