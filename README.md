@@ -1,72 +1,123 @@
-# Face Recognition System
+# 人脸识别与美妆集成系统
 
-This is a web-based face recognition application built with Python, Flask, OpenCV, and Keras.
+## 1. 项目介绍
 
-The system allows users to register new faces through a web interface, trains a recognition model on the collected data, and performs real-time face recognition directly in the browser.
+本项目是一个基于深度学习的人脸识别与智能美妆集成系统。系统通过Web界面提供服务，用户可以进行人脸信息的注册、登录验证、实时美妆体验以及戴口罩后的人脸识别。项目后端采用Python和Flask框架，前端使用HTML/CSS/JavaScript构建，核心算法利用TensorFlow/Keras、OpenCV和Dlib等技术实现。
 
-## Features
+系统的设计旨在探索和融合多种计算机视觉技术，不仅实现了传统的人脸识别功能，还创新性地集成了GAN（生成对抗网络）美妆技术和特殊场景（如佩戴口罩）下的识别能力，为用户提供一站式的智能化人脸处理体验。
 
-- **Web-Based Interface**: All functionalities are accessible through a clean web UI.
-- **Online Face Registration**: Easily add new users by collecting face data directly from a webcam.
-- **Real-Time Recognition**: Performs live face recognition on a video stream embedded in the web page.
-- **Optimized Performance**: Uses a skip-frame mechanism to ensure smooth video streaming during recognition.
-- **Clear Feedback**: Displays the recognized name and the model's confidence score directly on the video feed.
+## 2. 技术栈与创新点
 
-## How to Use
+### 主要技术
 
-### 1. Environment Setup
+*   **后端框架**: Flask
+*   **核心算法库**: TensorFlow, Keras, OpenCV, Dlib
+*   **前端技术**: HTML, CSS, JavaScript, JQuery
+*   **数据库**: SQLite (通过`database.py`进行封装)
+*   **人脸检测模型**: Haar级联分类器 (`haarcascade_frontalface_alt.xml`)
+*   **面部关键点检测**: Dlib (`shape_predictor_68_face_landmarks.dat`)
+*   **人脸识别模型**: 基于Keras训练的CNN模型 (`face.keras`)
+*   **戴口罩人脸识别模型**: 专门训练的CNN模型 (`masked_face.keras`)
+*   **美妆迁移**: BeautyGAN (基于TensorFlow实现)
 
-First, it is highly recommended to create a Python virtual environment.
+### 项目创新点
 
-Then, install all the necessary dependencies. You can create a `requirements.txt` file with the following content:
+1.  **功能集成化**: 将常规人脸识别、戴口罩人脸识别和GAN美妆三大功能整合在同一个Web服务中，提供了丰富多样的应用场景。
+2.  **特殊场景识别**: 专门针对佩戴口罩的场景进行了数据预处理（`prepare_masked_dataset.py`）和模型训练，提高了系统在现实场景中的鲁棒性。
+3.  **GAN技术应用**: 引入BeautyGAN模型，实现了实时的妆容迁移，用户可以上传自己的照片和妆容模板，系统能智能地将妆容应用到用户脸上，具有很强的趣味性和实用性。
+4.  **模块化设计**: 项目结构清晰，将数据采集、模型训练、数据库管理、Web服务等功能解耦为独立的Python脚本，便于维护和扩展。
 
-```txt
+## 3. 主要功能
+
+*   **用户管理**: 提供用户注册和信息展示功能。
+*   **人脸数据采集**: 通过摄像头为新用户采集多张人脸图像，用于后续的模型训练或识别。
+*   **人脸识别登录**: 用户可以通过摄像头进行刷脸登录，系统会实时识别并验证用户身份。
+*   **戴口罩识别**: 系统能够识别出佩戴口罩的用户身份。
+*   **智能美妆**: 用户可以上传个人生活照和妆容图片，系统会将妆容效果智能地迁移到用户照片上。
+*   **历史记录**: 查看识别或处理的历史信息（如`recognition_log.txt`）。
+
+## 4. 项目运行与调试
+
+### 编码规范
+
+*   项目所有Python源文件（`.py`）和文本文件均采用 **UTF-8** 编码，以确保中文字符的正确处理。
+
+### 环境配置
+
+建议使用Python 3.8或更高版本。为了管理项目依赖，最好在项目根目录下创建一个`requirements.txt`文件，并使用`pip`进行安装。根据项目文件推断，可能需要的核心依赖如下：
+
+```
+# requirements.txt (示例)
 flask
-numpy
+tensorflow
 opencv-python
-tensorflow # or tensorflow-cpu
-keras
-# Add other libraries if you use them
+dlib
+numpy
+pillow
+scikit-learn
 ```
 
-And install them using pip:
+执行以下命令安装依赖：
 ```bash
 pip install -r requirements.txt
 ```
+*注意：`dlib`的安装可能需要系统预先安装CMake和C++编译器。*
 
-### 2. Running the Application
+### 启动项目
 
-To start the system, run the main application file:
+1.  **主应用启动**:
+    项目的主入口是 `main.py`。通过以下命令启动Web服务：
+    ```bash
+    python main.py
+    ```
+    服务启动后，默认会在 `http://127.0.0.1:5000` 上运行。此时可以通过浏览器访问该地址来使用系统功能。
 
-```bash
-python main.py
-```
+2.  **BeautyGAN服务**:
+    `run_beautygan_server.py` 文件表明BeautyGAN可能作为一个独立的服务运行。如果主应用中的美妆功能依赖此服务，则需要先启动它。
 
-The web server will start, and you can access the application by navigating to `http://127.0.0.1:5000` in your web browser.
+### 项目设计
 
-### 3. Registering a New Face
+*   **MVC模式**: 项目采用了类似Model-View-Controller的设计模式。
+    *   **Model**: 由`database.py`、`faceRegnigtionModel.py`和`masked_face_model.py`等文件构成，负责数据和业务逻辑。
+    *   **View**: 由`templates`目录下的HTML文件构成，负责用户界面的展示。
+    *   **Controller**: 由`main.py`中的Flask路由函数构成，负责接收用户请求并调用相应的模型和视图进行响应。
+*   **模块化**: 不同功能的代码被拆分到不同的文件中（例如`collect_data.py`负责数据采集，`beauty_processor.py`负责美妆处理），提高了代码的可读性和可维护性。
 
-1.  On the home page, click on **"Register New Face"**.
-2.  Allow the browser to access your webcam.
-3.  Enter the person's name in the input field.
-4.  Click **"Start Collecting"**.
-5.  A new window will pop up, showing the camera feed. Please face the camera and allow the system to automatically capture about 50 images of your face. The window will close automatically when the collection is complete.
+### 调试技巧
 
-### 4. Training the Model
+1.  **Flask调试模式**: 在`main.py`中启动Flask应用时，开启`debug=True`模式。这样在代码修改后服务器会自动重启，并且在发生错误时会在浏览器中显示详细的错误堆栈信息。
+    ```python
+    # main.py
+    if __name__ == '__main__':
+        app.run(host='0.0.0.0', port=5000, debug=True)
+    ```
+2.  **日志文件**: 项目配置了日志文件 `app.log` 和 `recognition_log.txt`。在调试时，可以向其中写入关键变量或状态信息，通过查看日志来定位问题。
+3.  **断点调试**: 使用IDE（如VS Code, PyCharm）的调试功能，在关键代码处设置断点，单步执行并观察程序运行时的变量状态。
 
-After registering a new face, you need to retrain the model to include the new data.
+## 5. 总结与展望
 
-Run the `dataHelper.py` script from your terminal:
+### 项目总结
 
-```bash
-python dataHelper.py
-```
+本系统成功地将多种计算机视觉技术集成到一个统一的平台中，实现了一个功能全面、具有创新性的人脸处理应用。项目不仅覆盖了基础的人脸识别流程，还通过引入GAN和特殊场景识别，展示了该领域技术的多样性和实用价值。整个项目代码结构清晰，模块划分合理，为后续的开发和研究奠定了良好基础。
 
-This will update the `face.keras` model file with the newly added faces.
+### 不足之处
 
-### 5. Performing Face Recognition
+1.  **性能瓶颈**: 实时视频流的人脸识别和美妆处理对计算资源要求较高，在普通CPU上运行时可能会有明显的延迟。
+2.  **模型精度**: 当前模型的识别精度可能受光照、角度、遮挡等多种因素影响，泛化能力有待提高。
+3.  **用户体验**: 前端界面较为简单，交互逻辑和视觉效果可以进一步优化。
+4.  **部署复杂性**: 项目依赖较多（如dlib），且包含多个模型文件，手动部署和环境配置较为繁琐。
 
-1.  Go back to the home page (`http://127.0.0.1:5000`).
-2.  Click on **"Open Camera for Recognition"**.
-3.  The page will display the live video feed from your webcam, with recognized faces labeled with their name and confidence score.
+### 改进方向
 
+1.  **性能优化**:
+    *   **模型轻量化**: 采用如MobileNet、SqueezeNet等轻量级网络结构重新训练模型。
+    *   **硬件加速**: 利用GPU进行并行计算，大幅提升处理速度。
+    *   **后端优化**: 使用Gunicorn或uWSGI等生产级WSGI服务器替代Flask自带的开发服务器。
+2.  **算法升级**:
+    *   **检测算法**: 使用更先进的人脸检测算法，如MTCNN或YOLO-Face，以提高检测的准确率和速度。
+    *   **识别算法**: 采用ArcFace、FaceNet等基于度量学习的SOTA（State-of-the-art）人脸识别算法，以获得更高的识别精度。
+3.  **用户体验提升**:
+    *   **前端框架**: 引入Vue.js或React等现代化前端框架，构建更具动态性和交互性的单页应用（SPA）。
+    *   **异步处理**: 对于耗时的美妆处理等任务，采用Celery等任务队列进行异步处理，避免阻塞用户请求。
+4.  **容器化部署**:
+    *   使用 **Docker** 将整个应用及所有依赖打包成一个镜像，实现一键部署，简化环境配置的复杂性。
