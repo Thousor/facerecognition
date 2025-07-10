@@ -103,6 +103,14 @@ class MaskedFaceModel:
         self.model = None
         self.num_classes = num_classes
         self.image_size = image_size
+        self.data_augmentation = Sequential([
+            tf.keras.layers.RandomFlip("horizontal"),
+            tf.keras.layers.RandomRotation(0.2),
+            tf.keras.layers.RandomZoom(0.2),
+            tf.keras.layers.RandomContrast(0.2),
+            tf.keras.layers.RandomBrightness(0.2),
+            tf.keras.layers.RandomTranslation(height_factor=0.1, width_factor=0.1),
+        ])
 
     def build_model(self):
         """构建模型架构"""
@@ -119,7 +127,8 @@ class MaskedFaceModel:
 
         # 构建完整模型
         inputs = Input(shape=(self.image_size, self.image_size, 3))
-        x = preprocess_input(inputs)
+        x = self.data_augmentation(inputs)
+        x = preprocess_input(x)
 
         x = base_model(x, training=False)
         x = AttentionLayer(name="attention_layer")(x)
