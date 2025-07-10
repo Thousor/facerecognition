@@ -146,21 +146,16 @@ class FaceRecognitionModel:
         x = preprocess_input(x)
 
         # 预训练特征提取
-        x = base_model(x, training=False)
+        x = base_model(x, training=True)
 
         # 全局平均池化替代Flatten
         x = GlobalAveragePooling2D()(x)
 
         # 添加分类层
-        x = Dense(2048, kernel_regularizer=regularizers.l2(1e-4))(x)
-        x = BatchNormalization()(x)
-        x = Activation('relu')(x)
-        x = Dropout(0.6)(x)
-
         x = Dense(1024, kernel_regularizer=regularizers.l2(1e-4))(x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
-        x = Dropout(0.6)(x)
+        x = Dropout(0.5)(x)
 
         outputs = Dense(self.num_classes, activation='softmax')(x)
 
@@ -184,7 +179,7 @@ class FaceRecognitionModel:
         # 添加早停回调
         early_stopping = EarlyStopping(
             monitor='val_accuracy',
-            patience=25,
+            patience=15,
             verbose=1,
             restore_best_weights=True
         )
@@ -269,6 +264,23 @@ class FaceRecognitionModel:
 
         max_index = np.argmax(result)
         return max_index, result[0][max_index]
+
+    def predict_all(self, img):
+        """
+        预测单张图片，返回所有类别的概率
+        Args:
+            img: 输入图片（numpy数组）
+        Returns:
+            所有类别的概率数组
+        """
+        if len(img.shape) == 2:
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+
+        img = cv2.resize(img, (self.image_size, self.image_size))
+        img = np.expand_dims(img, axis=0)
+        img = preprocess_input(img)
+
+        return self.model.predict(img)[0]
 
 
 def train_and_save_model(stop_flag=None, progress_queue=None):
