@@ -82,53 +82,59 @@
                         <!-- 识别阈值 -->
                         <div class="input-group">
                             <input type="number" id="threshold" name="threshold" step="0.01" min="0" max="1" required
-                                class="peer">
+                                class="peer" placeholder="例如: 0.6">
                             <label for="threshold">识别阈值</label>
-                            <span class="hint">0.0 - 1.0</span>
+                            <span class="hint" id="threshold_hint">0.0 - 1.0</span>
+                            <p class="text-gray-500 text-xs mt-1" id="threshold_desc">用于判断人脸是否匹配的阈值。值越低，识别越宽松；值越高，识别越严格。</p>
                         </div>
 
                         <!-- 采集图像数量 -->
                         <div class="input-group">
                             <input type="number" id="num_images_to_collect" name="num_images_to_collect" min="10" required
-                                class="peer">
+                                class="peer" placeholder="例如: 30">
                             <label for="num_images_to_collect">采集图像数量</label>
-                            <span class="hint">最少10张</span>
+                            <span class="hint" id="num_images_to_collect_hint">最少10张</span>
+                            <p class="text-gray-500 text-xs mt-1" id="num_images_to_collect_desc">每次注册新用户时，系统需要采集的人脸图像数量，用于训练模型。</p>
                         </div>
 
                         <!-- 图像尺寸 -->
                         <div class="input-group">
                             <input type="number" id="image_size" name="image_size" min="32" required
-                                class="peer">
+                                class="peer" placeholder="例如: 160">
                             <label for="image_size">图像尺寸</label>
-                            <span class="hint">像素</span>
+                            <span class="hint" id="image_size_hint">像素</span>
+                            <p class="text-gray-500 text-xs mt-1" id="image_size_desc">人脸图像在处理和训练时将被缩放到的尺寸（例如：160x160像素）。</p>
                         </div>
 
                         <!-- 训练批次大小 -->
                         <div class="input-group">
                             <input type="number" id="batch_size" name="batch_size" min="1" required
-                                class="peer">
+                                class="peer" placeholder="例如: 32">
                             <label for="batch_size">训练批次大小</label>
-                            <span class="hint">≥ 1</span>
+                            <span class="hint" id="batch_size_hint">≥ 1</span>
+                            <p class="text-gray-500 text-xs mt-1" id="batch_size_desc">模型训练时每次处理的图像数量。较大的批次可能需要更多内存。</p>
                         </div>
 
                         <!-- 数据目录 -->
                         <div class="input-group md:col-span-2">
                             <input type="text" id="data_dir" name="data_dir" required
-                                class="peer">
+                                class="peer" placeholder="例如: D:\PythonProject\face-recognition-001\data">
                             <label for="data_dir">数据存储目录</label>
-                            <span class="hint"><i class="fas fa-folder"></i></span>
+                            <span class="hint" id="data_dir_hint"><i class="fas fa-folder"></i></span>
+                            <p class="text-gray-500 text-xs mt-1" id="data_dir_desc">用于存储用户人脸数据和训练数据集的根目录。请使用绝对路径。</p>
                         </div>
 
                         <!-- 模型文件路径 -->
                         <div class="input-group md:col-span-2">
                             <input type="text" id="model_file_path" name="model_file_path" required
-                                class="peer">
+                                class="peer" placeholder="例如: D:\PythonProject\face-recognition-001\face.keras">
                             <label for="model_file_path">模型文件路径</label>
-                            <span class="hint"><i class="fas fa-file-code"></i></span>
+                            <span class="hint" id="model_file_path_hint"><i class="fas fa-file-code"></i></span>
+                            <p class="text-gray-500 text-xs mt-1" id="model_file_path_desc">人脸识别模型文件的完整路径。请使用绝对路径。</p>
                         </div>
                     </div>
 
-                    <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                    <div class="flex justify-end items-center pt-6 border-t border-gray-200 space-x-4">
                         <div id="message" class="flex items-center text-sm font-medium"></div>
                         <div class="space-x-4">
                             <button type="button" onclick="resetToDefaults()" 
