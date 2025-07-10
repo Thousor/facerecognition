@@ -137,10 +137,10 @@ class MaskedFaceModel:
         x = GlobalAveragePooling2D()(x)
 
         # 添加全连接层
-        x = Dense(1024, kernel_regularizer=regularizers.l2(1e-4))(x)
+        x = Dense(256, kernel_regularizer=regularizers.l2(1e-4))(x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
-        x = Dropout(0.5)(x)
+        x = Dropout(0.6)(x)
 
         # 输出层
         outputs = Dense(self.num_classes, activation='softmax')(x)
@@ -152,7 +152,7 @@ class MaskedFaceModel:
         """训练模型"""
         # 配置优化器和学习率
         total_steps = (train_size // BATCH_SIZE) * 300
-        lr_schedule = CosineDecay(initial_learning_rate=0.0001, decay_steps=total_steps)
+        lr_schedule = CosineDecay(initial_learning_rate=0.00005, decay_steps=total_steps)
 
         self.model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
@@ -166,7 +166,7 @@ class MaskedFaceModel:
         # 早停
         early_stopping = EarlyStopping(
             monitor='val_accuracy',
-            patience=25,
+            patience=50,
             verbose=1,
             restore_best_weights=True
         )
@@ -217,21 +217,31 @@ class MaskedFaceModel:
         print('模型加载完成！')
 
     def predict(self, img):
-        """预测单张图片"""
-        # 确保图像是RGB格式
+        """
+        预测单张图片
+        Args:
+            img: 输入图片（numpy数组）
+        Returns:
+            (预测的类别索引, 预测的概率)
+        """
+        predictions = self.predict_all(img)
+        max_index = np.argmax(predictions)
+        return max_index, predictions[max_index]
+
+    def predict_all(self, img):
+        """
+        预测单张图片，返回所有类别的概率
+        Args:
+            img: 输入图片（numpy数组）
+        Returns:
+            所有类别的预测概率数组
+        """
         if len(img.shape) == 2:
             img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
-
-        # 预处理图像
         img = cv2.resize(img, (self.image_size, self.image_size))
         img = np.expand_dims(img, axis=0)
         img = preprocess_input(img)
-
-        # 使用Keras模型进行预测
-        result = self.model.predict(img)
-
-        max_index = np.argmax(result)
-        return max_index, result[0][max_index]
+        return self.model.predict(img)[0]
 
 
 def train_and_save_model(data_dir, stop_flag=None, progress_queue=None):

@@ -222,10 +222,18 @@ def gen_frames():
                         label_masked, prob_masked = -1, 0.0
 
                         if face_recognition_model:
-                            label_unmasked, prob_unmasked = face_recognition_model.predict(ROI)
+                            # Get all probabilities for unmasked model
+                            unmasked_predictions = face_recognition_model.predict_all(ROI)
+                            label_unmasked = np.argmax(unmasked_predictions)
+                            prob_unmasked = unmasked_predictions[label_unmasked]
+                            print(f"DEBUG: Unmasked Model Predictions: {unmasked_predictions}")
 
                         if masked_face_model:
-                            label_masked, prob_masked = masked_face_model.predict(ROI)
+                            # Get all probabilities for masked model
+                            masked_predictions = masked_face_model.predict_all(ROI)
+                            label_masked = np.argmax(masked_predictions)
+                            prob_masked = masked_predictions[label_masked]
+                            print(f"DEBUG: Masked Model Predictions: {masked_predictions}")
 
                         print(f"DEBUG: Prob Unmasked: {prob_unmasked:.4f}, Prob Masked: {prob_masked:.4f}")
 
