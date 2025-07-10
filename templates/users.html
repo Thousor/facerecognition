@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>User Management</title>
+    <title>用户管理</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
         h1 { color: #333; }
@@ -21,11 +21,11 @@
     </style>
 </head>
 <body>
-    <h1>Registered Users</h1>
+    <h1>注册用户</h1>
     <ul id="user_list">
-        <!-- User items will be loaded here by JavaScript -->
+        <!-- 用户列表将由JavaScript加载到这里 -->
     </ul>
-    <a href="/" class="back-link">Back to Home</a>
+    <a href="/" class="back-link">返回主页</a>
 
     <script>
         document.addEventListener('DOMContentLoaded', fetchUsers);
@@ -35,9 +35,9 @@
                 .then(response => response.json())
                 .then(users => {
                     const userList = document.getElementById('user_list');
-                    userList.innerHTML = ''; // Clear existing list
+                    userList.innerHTML = ''; // 清空现有列表
                     if (users.length === 0) {
-                        userList.innerHTML = '<p>No users registered yet.</p>';
+                        userList.innerHTML = '<p>暂无注册用户。</p>';
                         return;
                     }
                     users.forEach(user => {
@@ -45,17 +45,17 @@
                         listItem.innerHTML = `
                             <span class="user-name">${user}</span>
                             <div class="actions">
-                                <button class="view-btn" onclick="viewUser('${user}')">View</button>
-                                <button class="rename-btn" onclick="renameUser('${user}')">Rename</button>
-                                <button class="delete-btn" onclick="deleteUser('${user}')">Delete</button>
+                                <button class="view-btn" onclick="viewUser('${user}')">查看</button>
+                                <button class="rename-btn" onclick="renameUser('${user}')">重命名</button>
+                                <button class="delete-btn" onclick="deleteUser('${user}')">删除</button>
                             </div>
                         `;
                         userList.appendChild(listItem);
                     });
                 })
                 .catch(error => {
-                    console.error('Error fetching users:', error);
-                    document.getElementById('user_list').innerHTML = '<p>Error loading users.</p>';
+                    console.error('获取用户时出错:', error);
+                    document.getElementById('user_list').innerHTML = '<p>加载用户时出错。</p>';
                 });
         }
 
@@ -64,7 +64,7 @@
         }
 
         function renameUser(oldName) {
-            const newName = prompt(`Enter new name for ${oldName}:`);
+            const newName = prompt(`请输入 ${oldName} 的新名称:`);
             if (newName && newName.trim() !== '' && newName !== oldName) {
                 fetch(`/api/users/rename/${oldName}`, {
                     method: 'POST',
@@ -77,20 +77,20 @@
                 .then(data => {
                     alert(data.message);
                     if (data.success) {
-                        fetchUsers(); // Refresh the list
+                        fetchUsers(); // 刷新列表
                     }
                 })
                 .catch(error => {
-                    console.error('Error renaming user:', error);
-                    alert('An error occurred while renaming the user.');
+                    console.error('重命名用户时出错:', error);
+                    alert('重命名用户时发生错误。');
                 });
             } else if (newName !== null && newName.trim() === oldName) {
-                alert('New name is the same as the old name.');
+                alert('新名称与旧名称相同。');
             }
         }
 
         function deleteUser(userName) {
-            if (confirm(`Are you sure you want to delete user ${userName}? This action cannot be undone.`)) {
+            if (confirm(`确定要删除用户 ${userName} 吗？此操作无法撤销。`)) {
                 fetch(`/api/users/delete/${userName}`, {
                     method: 'POST',
                 })
@@ -98,12 +98,12 @@
                 .then(data => {
                     alert(data.message);
                     if (data.success) {
-                        fetchUsers(); // Refresh the list
+                        fetchUsers(); // 刷新列表
                     }
                 })
                 .catch(error => {
-                    console.error('Error deleting user:', error);
-                    alert('An error occurred while deleting the user.');
+                    console.error('删除用户时出错:', error);
+                    alert('删除用户时发生错误。');
                 });
             }
         }

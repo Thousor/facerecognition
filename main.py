@@ -18,7 +18,7 @@ import cv2
 import tensorflow as tf
 tf.config.run_functions_eagerly(True)
 tf.data.experimental.enable_debug_mode()
-from flask import Flask, render_template, request, redirect, url_for, jsonify, Response, send_file, make_response
+from flask import Flask, render_template, request, redirect, url_for, jsonify, Response, send_file, make_response, send_from_directory
 from werkzeug.utils import secure_filename
 from beauty_processor import BeautyProcessor
 import io
@@ -96,6 +96,7 @@ def log_recognition_event(name, confidence):
 load_config()
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
+app.add_url_rule('/data/<path:filename>', endpoint='data', view_func=lambda filename: send_from_directory('data', filename))
 
 # --- Globals ---
 # Camera is now managed within each generator function, not globally.
@@ -612,12 +613,12 @@ def user_detail_page(name):
 
 @app.route("/api/users/<name>/images")
 def get_user_images(name):
-    user_path = os.path.join('dataset', name)
+    user_path = os.path.join('data', name)
     images = []
     if os.path.exists(user_path) and os.path.isdir(user_path):
         for filename in os.listdir(user_path):
             if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
-                images.append(f'/dataset/{name}/{filename}')
+                images.append(f'/data/{name}/{filename}')
     return jsonify(images)
 
 
