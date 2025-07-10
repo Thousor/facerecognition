@@ -353,9 +353,7 @@ def gen_frames_collect():
                     # print("No faces detected.") # Commented out
                     pass  # Suppress message for now
 
-                # Update status text on display frame
-                status_text = f"Collecting: {collected_image_count}/{target_image_count}"
-                cv2.putText(display_frame, status_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                
 
                 if collected_image_count >= target_image_count:
                     is_collecting = False  # Stop collection automatically
